@@ -1,7 +1,20 @@
-"""""
-The MainWindow of the application
-"""
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file '/Users/thethelafaltein/Desktop/University/Research/DesktopApplication.ui'
+#
+# Created by: PyQt5 UI code generator 5.12.3
+#
+# WARNING! All changes made in this file will be lost!
+
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
+
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+
+import numpy as np; np.random.seed(1)
 
 
 class Ui_MainWindow(object):
@@ -42,22 +55,9 @@ class Ui_MainWindow(object):
         self.label.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.label.setObjectName("label")
         self.verticalLayout_3.addWidget(self.label)
-        self.radioButton_2 = QtWidgets.QRadioButton(self.left_left_scrollarea_widget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.radioButton_2.sizePolicy().hasHeightForWidth())
-        self.radioButton_2.setSizePolicy(sizePolicy)
-        self.radioButton_2.setObjectName("radioButton_2")
-        self.verticalLayout_3.addWidget(self.radioButton_2)
-        self.radioButton = QtWidgets.QRadioButton(self.left_left_scrollarea_widget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.radioButton.sizePolicy().hasHeightForWidth())
-        self.radioButton.setSizePolicy(sizePolicy)
-        self.radioButton.setObjectName("radioButton")
-        self.verticalLayout_3.addWidget(self.radioButton)
+        self.datasetInfo = QtWidgets.QLabel(self.left_left_scrollarea_widget)
+        self.datasetInfo.setObjectName("datasetInfo")
+        self.verticalLayout_3.addWidget(self.datasetInfo, 0, QtCore.Qt.AlignBottom)
         self.left_left_scrollArea.setWidget(self.left_left_scrollarea_widget)
         self.left_main_horizontallayout.addWidget(self.left_left_scrollArea)
         self.left_right_scrollArea = QtWidgets.QScrollArea(self.left_widget)
@@ -73,65 +73,50 @@ class Ui_MainWindow(object):
         self.left_right_scrollarea_widget.setObjectName("left_right_scrollarea_widget")
         self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.left_right_scrollarea_widget)
         self.verticalLayout_5.setObjectName("verticalLayout_5")
+
         self.Channels = QtWidgets.QLabel(self.left_right_scrollarea_widget)
-        self.Channels.setMinimumSize(QtCore.QSize(0, 0))
-        self.Channels.setMaximumSize(QtCore.QSize(81, 27))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.Channels.sizePolicy().hasHeightForWidth())
+        self.Channels.setSizePolicy(sizePolicy)
+        self.Channels.setMinimumSize(QtCore.QSize(0, 65))
+        self.Channels.setMaximumSize(QtCore.QSize(83, 65))
+        self.Channels.setSizeIncrement(QtCore.QSize(0, 0))
+        self.Channels.setBaseSize(QtCore.QSize(0, 0))
         self.Channels.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.Channels.setFrameShadow(QtWidgets.QFrame.Plain)
         self.Channels.setLineWidth(2)
         self.Channels.setMidLineWidth(1)
         self.Channels.setScaledContents(False)
         self.Channels.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+        self.Channels.setWordWrap(False)
+        self.Channels.setIndent(0)
         self.Channels.setObjectName("Channels")
         self.verticalLayout_5.addWidget(self.Channels)
-        self.CH1 = QtWidgets.QRadioButton(self.left_right_scrollarea_widget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.CH1.sizePolicy().hasHeightForWidth())
-        self.CH1.setSizePolicy(sizePolicy)
-        self.CH1.setObjectName("CH1")
-        self.verticalLayout_5.addWidget(self.CH1)
-        self.CH2 = QtWidgets.QRadioButton(self.left_right_scrollarea_widget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.CH2.sizePolicy().hasHeightForWidth())
-        self.CH2.setSizePolicy(sizePolicy)
-        self.CH2.setObjectName("CH2")
-        self.verticalLayout_5.addWidget(self.CH2)
-        self.CH3 = QtWidgets.QRadioButton(self.left_right_scrollarea_widget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.CH3.sizePolicy().hasHeightForWidth())
-        self.CH3.setSizePolicy(sizePolicy)
-        self.CH3.setObjectName("CH3")
-        self.verticalLayout_5.addWidget(self.CH3)
-        self.CH4 = QtWidgets.QRadioButton(self.left_right_scrollarea_widget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.CH4.sizePolicy().hasHeightForWidth())
-        self.CH4.setSizePolicy(sizePolicy)
-        self.CH4.setObjectName("CH4")
-        self.verticalLayout_5.addWidget(self.CH4)
-        self.CH13 = QtWidgets.QRadioButton(self.left_right_scrollarea_widget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.CH13.sizePolicy().hasHeightForWidth())
-        self.CH13.setSizePolicy(sizePolicy)
-        self.CH13.setObjectName("CH13")
-        self.verticalLayout_5.addWidget(self.CH13)
-        self.CH14 = QtWidgets.QRadioButton(self.left_right_scrollarea_widget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.CH14.sizePolicy().hasHeightForWidth())
-        self.CH14.setSizePolicy(sizePolicy)
-        self.CH14.setObjectName("CH14")
-        self.verticalLayout_5.addWidget(self.CH14)
+        self.EDA = QtWidgets.QCheckBox(self.left_right_scrollarea_widget)
+        self.EDA.setIconSize(QtCore.QSize(16, 16))
+        self.EDA.setChecked(True)
+        self.EDA.setTristate(False)
+        self.EDA.setObjectName("EDA")
+
+        self.EDA.stateChanged.connect(self.checkmarkers)
+        self.verticalLayout_5.addWidget(self.EDA)
+        self.ECG = QtWidgets.QCheckBox(self.left_right_scrollarea_widget)
+        self.ECG.setChecked(True)
+        self.ECG.setObjectName("ECG")
+        self.verticalLayout_5.addWidget(self.ECG)
+        self.RSP = QtWidgets.QCheckBox(self.left_right_scrollarea_widget)
+        self.RSP.setChecked(True)
+        self.RSP.setObjectName("RSP")
+        self.verticalLayout_5.addWidget(self.RSP)
+        self.PPG = QtWidgets.QCheckBox(self.left_right_scrollarea_widget)
+        self.PPG.setChecked(True)
+        self.PPG.setObjectName("PPG")
+        self.verticalLayout_5.addWidget(self.PPG)
+        self.ChannelsInfo = QtWidgets.QLabel(self.left_right_scrollarea_widget)
+        self.ChannelsInfo.setObjectName("ChannelsInfo")
+        self.verticalLayout_5.addWidget(self.ChannelsInfo, 0, QtCore.Qt.AlignBottom)
         self.left_right_scrollArea.setWidget(self.left_right_scrollarea_widget)
         self.left_main_horizontallayout.addWidget(self.left_right_scrollArea)
         self.horizontalLayout_5.addLayout(self.left_main_horizontallayout)
@@ -235,28 +220,88 @@ class Ui_MainWindow(object):
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionExit_Application)
 
+
+        self.x = np.sort(np.random.rand(15))
+        self.y = np.sort(np.random.rand(15))
+        self.y2 = np.sort(np.random.rand(15))
+
+        self.fig = plt.figure()
+        self.ax1 = plt.subplot(2, 2, 1)
+        self.line1, = plt.plot(self.x, self.y)
+        self.ax1.grid(True)
+
+        self.ax2 = self.ax1.twinx()
+        self.line2, = self.ax2.plot(self.x, self.y2, color='green')
+        self.ax2.tick_params(axis='y', labelcolor='green')
+
+        self.annots = []
+        for ax in [self.ax1, self.ax2]:
+            annot = self.ax1.annotate("", xy=(0, 0), xytext=(-20, 20), textcoords="offset points",
+                                 bbox=dict(boxstyle="round", fc="w", alpha=0.4),
+                                 arrowprops=dict(arrowstyle="->"))
+            annot.set_visible(False)
+            self.annots.append(annot)
+
+        self.annot_dic = dict(zip([self.ax1, self.ax2], self.annots))
+        self.line_dic = dict(zip([self.ax1, self.ax2], [self.line1, self.line2]))
+
+        def update_annot(line, annot, ind):
+            x, y = line.get_data()
+            annot.xy = (x[ind["ind"][0]], y[ind["ind"][0]])
+            text = "x = {}\ny= {}".format(x[ind["ind"][0]], y[ind["ind"][0]])
+            annot.set_text(text)
+
+        def hover(event):
+
+            if event.inaxes in [self.ax1, self.ax2]:
+                for ax in [self.ax1, self.ax2]:
+                    cont, ind = self.line_dic[ax].contains(event)
+                    annot = self.annot_dic[ax]
+                    if cont:
+                        update_annot(self.line_dic[ax], annot, ind)
+                        annot.set_visible(True)
+                        self.fig.canvas.draw_idle()
+                    else:
+                        if annot.get_visible():
+                            annot.set_visible(False)
+                            self.fig.canvas.draw_idle()
+
+
+
+
+
+        self.wid=FigureCanvas(self.fig)
+
+
+
+        self.verticalLayout_7.addWidget(self.wid)
+
+        self.fig.canvas.draw_idle()
+
+        self.fig.canvas.mpl_connect("motion_notify_event", hover)
+
         self.retranslateUi(MainWindow)
+
+
+        self.checkmarkers()
+
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+
+
+
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Data Set(s)</span></p></body></html>"))
-        self.radioButton_2.setText(_translate("MainWindow", "Data set 1"))
-        self.radioButton.setText(_translate("MainWindow", "Data set 2"))
+        self.datasetInfo.setText(_translate("MainWindow", "datasetinfo"))
         self.Channels.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Channels</span></p></body></html>"))
-        self.CH1.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic;\">CH 1, PPG, X, PPGED-R</span></p></body></html>"))
-        self.CH1.setText(_translate("MainWindow", "CH1(PPG)"))
-        self.CH2.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic;\">CH 2, RSP, X, RSPEC-R</span></p></body></html>"))
-        self.CH2.setText(_translate("MainWindow", "CH2(RSP)"))
-        self.CH3.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic;\">CH 3, PPG, X, PPGED-R</span></p></body></html>"))
-        self.CH3.setText(_translate("MainWindow", "CH3(PPG)"))
-        self.CH4.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic;\">CH 4, EDA, Y, PPGED-R</span></p></body></html>"))
-        self.CH4.setText(_translate("MainWindow", "CH4(EDA)"))
-        self.CH13.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic;\">CH13, EDA, Y, PPGED-R</span></p></body></html>"))
-        self.CH13.setText(_translate("MainWindow", "CH13(EDA)"))
-        self.CH14.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic;\">CH14, ECG, Y, RSPEC-R</span></p></body></html>"))
-        self.CH14.setText(_translate("MainWindow", "CH14(ECG)"))
+        self.EDA.setText(_translate("MainWindow", "EDA"))
+        self.ECG.setText(_translate("MainWindow", "ECG"))
+        self.RSP.setText(_translate("MainWindow", "RSP"))
+        self.PPG.setText(_translate("MainWindow", "PPG"))
+        self.ChannelsInfo.setText(_translate("MainWindow", "ChannelInfo"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuInsert.setTitle(_translate("MainWindow", "Insert"))
         self.menuWindow.setTitle(_translate("MainWindow", "Window"))
@@ -272,6 +317,17 @@ class Ui_MainWindow(object):
         self.actionExport_Data.setText(_translate("MainWindow", "Export Data"))
         self.actionExit_Application.setText(_translate("MainWindow", "Exit Application"))
         self.actionDownload_data.setText(_translate("MainWindow", "Download data"))
+
+
+
+    def checkmarkers(self):
+        if(self.EDA.checkState()==0):
+           self.datasetInfo.setText("Fucks")
+        else:
+            self.datasetInfo.setText("datasetInfo")
+
+
+
 
 
 if __name__ == "__main__":
