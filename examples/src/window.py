@@ -1,267 +1,230 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file '/Users/thethelafaltein/Desktop/University/Research/DesktopApplication.ui'
+#
+# Created by: PyQt5 UI code generator 5.12.3
+#
+# WARNING! All changes made in this file will be lost!
 
 
-#############################################################################
-##
-## Copyright (C) 2014 Riverbank Computing Limited.
-## Copyright (C) 2014 Digia Plc
-## All rights reserved.
-## For any questions to Digia, please use contact form at http://qt.digia.com
-##
-## This file is part of the QtDataVisualization module.
-##
-## Licensees holding valid Qt Enterprise licenses may use this file in
-## accordance with the Qt Enterprise License Agreement provided with the
-## Software or, alternatively, in accordance with the terms contained in
-## a written agreement between you and Digia.
-##
-## If you have questions regarding the use of this file, please use
-## contact form at http://qt.digia.com
-##
-#############################################################################
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-import math
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(610, 685)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.gridLayout_2 = QtWidgets.QGridLayout(self.centralwidget)
+        self.gridLayout_2.setObjectName("gridLayout_2")
+        self.centralhorizontallayout = QtWidgets.QHBoxLayout()
+        self.centralhorizontallayout.setObjectName("centralhorizontallayout")
+        self.left_widget = QtWidgets.QWidget(self.centralwidget)
+        self.left_widget.setObjectName("left_widget")
+        self.horizontalLayout_5 = QtWidgets.QHBoxLayout(self.left_widget)
+        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
+        self.left_main_horizontallayout = QtWidgets.QHBoxLayout()
+        self.left_main_horizontallayout.setObjectName("left_main_horizontallayout")
+        self.left_left_scrollArea = QtWidgets.QScrollArea(self.left_widget)
+        self.left_left_scrollArea.setWidgetResizable(True)
+        self.left_left_scrollArea.setObjectName("left_left_scrollArea")
+        self.left_left_scrollarea_widget = QtWidgets.QWidget()
+        self.left_left_scrollarea_widget.setGeometry(QtCore.QRect(0, 0, 124, 544))
+        self.left_left_scrollarea_widget.setObjectName("left_left_scrollarea_widget")
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.left_left_scrollarea_widget)
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.label = QtWidgets.QLabel(self.left_left_scrollarea_widget)
+        font = QtGui.QFont()
+        font.setFamily("Arial Black")
+        font.setPointSize(14)
+        self.label.setFont(font)
+        self.label.setObjectName("label")
+        self.verticalLayout_3.addWidget(self.label)
+        self.left_left_scrollArea.setWidget(self.left_left_scrollarea_widget)
+        self.left_main_horizontallayout.addWidget(self.left_left_scrollArea)
+        self.left_right_scrollArea = QtWidgets.QScrollArea(self.left_widget)
+        self.left_right_scrollArea.setWidgetResizable(True)
+        self.left_right_scrollArea.setObjectName("left_right_scrollArea")
+        self.left_right_scrollarea_widget = QtWidgets.QWidget()
+        self.left_right_scrollarea_widget.setGeometry(QtCore.QRect(0, 0, 123, 544))
+        self.left_right_scrollarea_widget.setObjectName("left_right_scrollarea_widget")
+        self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.left_right_scrollarea_widget)
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.Channels = QtWidgets.QLabel(self.left_right_scrollarea_widget)
+        self.Channels.setMinimumSize(QtCore.QSize(0, 0))
+        self.Channels.setMaximumSize(QtCore.QSize(81, 27))
+        self.Channels.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.Channels.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.Channels.setLineWidth(2)
+        self.Channels.setMidLineWidth(1)
+        self.Channels.setScaledContents(False)
+        self.Channels.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+        self.Channels.setObjectName("Channels")
+        self.verticalLayout_5.addWidget(self.Channels)
+        self.CH1 = QtWidgets.QRadioButton(self.left_right_scrollarea_widget)
+        self.CH1.setObjectName("CH1")
+        self.verticalLayout_5.addWidget(self.CH1)
+        self.CH2 = QtWidgets.QRadioButton(self.left_right_scrollarea_widget)
+        self.CH2.setObjectName("CH2")
+        self.verticalLayout_5.addWidget(self.CH2)
+        self.CH3 = QtWidgets.QRadioButton(self.left_right_scrollarea_widget)
+        self.CH3.setObjectName("CH3")
+        self.verticalLayout_5.addWidget(self.CH3)
+        self.CH4 = QtWidgets.QRadioButton(self.left_right_scrollarea_widget)
+        self.CH4.setObjectName("CH4")
+        self.verticalLayout_5.addWidget(self.CH4)
+        self.CH13 = QtWidgets.QRadioButton(self.left_right_scrollarea_widget)
+        self.CH13.setObjectName("CH13")
+        self.verticalLayout_5.addWidget(self.CH13)
+        self.CH14 = QtWidgets.QRadioButton(self.left_right_scrollarea_widget)
+        self.CH14.setObjectName("CH14")
+        self.verticalLayout_5.addWidget(self.CH14)
+        self.left_right_scrollArea.setWidget(self.left_right_scrollarea_widget)
+        self.left_main_horizontallayout.addWidget(self.left_right_scrollArea)
+        self.horizontalLayout_5.addLayout(self.left_main_horizontallayout)
+        self.centralhorizontallayout.addWidget(self.left_widget)
+        self.right_widget_2 = QtWidgets.QWidget(self.centralwidget)
+        self.right_widget_2.setObjectName("right_widget_2")
+        self.horizontalLayout_7 = QtWidgets.QHBoxLayout(self.right_widget_2)
+        self.horizontalLayout_7.setObjectName("horizontalLayout_7")
+        self.right_scrollArea = QtWidgets.QScrollArea(self.right_widget_2)
+        self.right_scrollArea.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.right_scrollArea.setWidgetResizable(True)
+        self.right_scrollArea.setObjectName("right_scrollArea")
+        self.right_scrollArea_widget = QtWidgets.QWidget()
+        self.right_scrollArea_widget.setGeometry(QtCore.QRect(0, 0, 261, 546))
+        self.right_scrollArea_widget.setObjectName("right_scrollArea_widget")
+        self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.right_scrollArea_widget)
+        self.verticalLayout_7.setObjectName("verticalLayout_7")
+        self.right_scrollArea.setWidget(self.right_scrollArea_widget)
+        self.horizontalLayout_7.addWidget(self.right_scrollArea)
+        self.centralhorizontallayout.addWidget(self.right_widget_2)
+        self.gridLayout_2.addLayout(self.centralhorizontallayout, 0, 0, 1, 1)
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 610, 22))
+        self.menubar.setObjectName("menubar")
+        self.menuFile = QtWidgets.QMenu(self.menubar)
+        self.menuFile.setObjectName("menuFile")
+        self.menuInsert = QtWidgets.QMenu(self.menubar)
+        self.menuInsert.setObjectName("menuInsert")
+        self.menuWindow = QtWidgets.QMenu(self.menubar)
+        self.menuWindow.setObjectName("menuWindow")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
+        self.toolBar = QtWidgets.QToolBar(MainWindow)
+        self.toolBar.setObjectName("toolBar")
+        MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
+        self.actionNew_Project = QtWidgets.QAction(MainWindow)
+        self.actionNew_Project.setCheckable(False)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("../../../PycharmProjects/DesktopApplication/res/images/icons/openproject.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionNew_Project.setIcon(icon)
+        self.actionNew_Project.setObjectName("actionNew_Project")
+        self.actionOpen_Project = QtWidgets.QAction(MainWindow)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap("../../../PycharmProjects/DesktopApplication/res/images/icons/newproject.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionOpen_Project.setIcon(icon1)
+        self.actionOpen_Project.setObjectName("actionOpen_Project")
+        self.actionSave = QtWidgets.QAction(MainWindow)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap("../../../PycharmProjects/DesktopApplication/res/images/icons/save.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionSave.setIcon(icon2)
+        self.actionSave.setObjectName("actionSave")
+        self.actionSave_As = QtWidgets.QAction(MainWindow)
+        self.actionSave_As.setIcon(icon2)
+        self.actionSave_As.setObjectName("actionSave_As")
+        self.actionAdd_Data = QtWidgets.QAction(MainWindow)
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap("../../../PycharmProjects/DesktopApplication/res/images/icons/insertdataset.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionAdd_Data.setIcon(icon3)
+        self.actionAdd_Data.setObjectName("actionAdd_Data")
+        self.actionZoom = QtWidgets.QAction(MainWindow)
+        self.actionZoom.setObjectName("actionZoom")
+        self.actionMinimize = QtWidgets.QAction(MainWindow)
+        self.actionMinimize.setObjectName("actionMinimize")
+        self.actionExport_Graph = QtWidgets.QAction(MainWindow)
+        self.actionExport_Graph.setObjectName("actionExport_Graph")
+        self.actionExport_Data = QtWidgets.QAction(MainWindow)
+        self.actionExport_Data.setObjectName("actionExport_Data")
+        self.actionExit_Application = QtWidgets.QAction(MainWindow)
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap("../../../PycharmProjects/DesktopApplication/res/images/icons/exitapplication.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionExit_Application.setIcon(icon4)
+        self.actionExit_Application.setObjectName("actionExit_Application")
+        self.actionDownload_data = QtWidgets.QAction(MainWindow)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap("../../../PycharmProjects/DesktopApplication/res/images/icons/download.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionDownload_data.setIcon(icon5)
+        self.actionDownload_data.setObjectName("actionDownload_data")
+        self.menuFile.addAction(self.actionNew_Project)
+        self.menuFile.addAction(self.actionOpen_Project)
+        self.menuFile.addSeparator()
+        self.menuFile.addAction(self.actionSave)
+        self.menuFile.addAction(self.actionSave_As)
+        self.menuFile.addSeparator()
+        self.menuInsert.addAction(self.actionAdd_Data)
+        self.menuWindow.addAction(self.actionZoom)
+        self.menuWindow.addAction(self.actionMinimize)
+        self.menuWindow.addAction(self.actionExit_Application)
+        self.menubar.addAction(self.menuFile.menuAction())
+        self.menubar.addAction(self.menuInsert.menuAction())
+        self.menubar.addAction(self.menuWindow.menuAction())
+        self.toolBar.addAction(self.actionNew_Project)
+        self.toolBar.addAction(self.actionOpen_Project)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionSave)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionAdd_Data)
+        self.toolBar.addAction(self.actionDownload_data)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionExit_Application)
 
-from PyQt5.QtCore import pyqtSignal, QObject, QSize, Qt
-from PyQt5.QT import (Q3DCamera, Q3DTheme, Q3DScatter,
-        QAbstract3DGraph, QAbstract3DSeries, QScatter3DSeries,
-        QScatterDataItem, QScatterDataProxy)
-from PyQt5.QtGui import QFont, QVector3D
-from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox, QFontComboBox,
-        QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget)
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.label.setText(_translate("MainWindow", "Data Set(s)"))
+        self.Channels.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Channels</span></p></body></html>"))
+        self.CH1.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic;\">CH 1, PPG, X, PPGED-R</span></p></body></html>"))
+        self.CH1.setText(_translate("MainWindow", "CH1(PPG)"))
+        self.CH2.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic;\">CH 2, RSP, X, RSPEC-R</span></p></body></html>"))
+        self.CH2.setText(_translate("MainWindow", "CH2(RSP)"))
+        self.CH3.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic;\">CH 3, PPG, X, PPGED-R</span></p></body></html>"))
+        self.CH3.setText(_translate("MainWindow", "CH3(PPG)"))
+        self.CH4.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic;\">CH 4, EDA, Y, PPGED-R</span></p></body></html>"))
+        self.CH4.setText(_translate("MainWindow", "CH4(EDA)"))
+        self.CH13.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic;\">CH13, EDA, Y, PPGED-R</span></p></body></html>"))
+        self.CH13.setText(_translate("MainWindow", "CH13(EDA)"))
+        self.CH14.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic;\">CH14, ECG, Y, RSPEC-R</span></p></body></html>"))
+        self.CH14.setText(_translate("MainWindow", "CH14(ECG)"))
+        self.menuFile.setTitle(_translate("MainWindow", "File"))
+        self.menuInsert.setTitle(_translate("MainWindow", "Insert"))
+        self.menuWindow.setTitle(_translate("MainWindow", "Window"))
+        self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
+        self.actionNew_Project.setText(_translate("MainWindow", "New Project"))
+        self.actionOpen_Project.setText(_translate("MainWindow", "Open Project"))
+        self.actionSave.setText(_translate("MainWindow", "Save"))
+        self.actionSave_As.setText(_translate("MainWindow", "Save As"))
+        self.actionAdd_Data.setText(_translate("MainWindow", "Add Data Set(s)"))
+        self.actionZoom.setText(_translate("MainWindow", "Zoom"))
+        self.actionMinimize.setText(_translate("MainWindow", "Minimize"))
+        self.actionExport_Graph.setText(_translate("MainWindow", "Export Graph"))
+        self.actionExport_Data.setText(_translate("MainWindow", "Export Data"))
+        self.actionExit_Application.setText(_translate("MainWindow", "Exit Application"))
+        self.actionDownload_data.setText(_translate("MainWindow", "Download data"))
 
 
-class ScatterDataModifier(QObject):
-
-    numberOfItems = 3600
-    curveDivider = 3.0
-    lowerNumberOfItems = 900
-    lowerCurveDivider = 0.75
-
-    backgroundEnabledChanged = pyqtSignal(bool)
-    gridEnabledChanged = pyqtSignal(bool)
-    shadowQualityChanged = pyqtSignal(int)
-    fontChanged = pyqtSignal(QFont)
-
-    def __init__(self, scatter):
-        super(ScatterDataModifier, self).__init__()
-
-        self.m_graph = scatter
-        self.m_fontSize = 40.0
-        self.m_style = QAbstract3DSeries.MeshSphere
-        self.m_smooth = True
-        self.m_itemCount = self.lowerNumberOfItems
-        self.m_curveDivider = self.lowerCurveDivider
-
-        self.m_graph.activeTheme().setType(Q3DTheme.ThemeEbony)
-        font = self.m_graph.activeTheme().font()
-        font.setPointSize(self.m_fontSize)
-        self.m_graph.activeTheme().setFont(font)
-        self.m_graph.setShadowQuality(QAbstract3DGraph.ShadowQualitySoftLow)
-        self.m_graph.scene().activeCamera().setCameraPreset(
-                Q3DCamera.CameraPresetFront)
-
-        proxy = QScatterDataProxy()
-        series = QScatter3DSeries(proxy)
-        series.setItemLabelFormat(
-                "@xTitle: @xLabel @yTitle: @yLabel @zTitle: @zLabel")
-        series.setMeshSmooth(self.m_smooth)
-        self.m_graph.addSeries(series)
-
-        self.addData()
-
-    def addData(self):
-        self.m_graph.axisX().setTitle("X")
-        self.m_graph.axisY().setTitle("Y")
-        self.m_graph.axisZ().setTitle("Z")
-
-        dataArray = []
-
-        limit = math.sqrt(self.m_itemCount) / 2.0
-        i = -limit
-        while i < limit:
-            j = -limit
-            while j < limit:
-                itm = QScatterDataItem(
-                        QVector3D(i + 0.5,
-                                math.cos(
-                                        math.radians((i * j) / self.m_curveDivider)),
-                                j + 0.5))
-                dataArray.append(itm)
-                j += 1.0
-
-            i += 1.0
-
-        self.m_graph.seriesList()[0].dataProxy().resetArray(dataArray)
-
-    def changeStyle(self, style):
-        comboBox = self.sender()
-        if isinstance(comboBox, QComboBox):
-            self.m_style = QAbstract3DSeries.Mesh(comboBox.itemData(style))
-            self.m_graph.seriesList()[0].setMesh(self.m_style)
-
-    def setSmoothDots(self, smooth):
-        self.m_smooth = bool(smooth)
-        self.m_graph.seriesList()[0].setMeshSmooth(self.m_smooth)
-
-    def changeTheme(self, theme):
-        currentTheme = self.m_graph.activeTheme()
-        currentTheme.setType(Q3DTheme.Theme(theme))
-        self.backgroundEnabledChanged.emit(currentTheme.isBackgroundEnabled())
-        self.gridEnabledChanged.emit(currentTheme.isGridEnabled())
-        self.fontChanged.emit(currentTheme.font())
-
-    preset = int(Q3DCamera.CameraPresetFrontLow)
-
-    def changePresetCamera(self):
-        self.m_graph.scene().activeCamera().setCameraPreset(
-                Q3DCamera.CameraPreset(self.preset))
-
-        self.preset += 1
-
-        if self.preset > Q3DCamera.CameraPresetDirectlyBelow:
-            self.preset = int(Q3DCamera.CameraPresetFrontLow)
-
-    def changeLabelStyle(self):
-        self.m_graph.activeTheme().setLabelBackgroundEnabled(
-                not self.m_graph.activeTheme().isLabelBackgroundEnabled())
-
-    def changeFont(self, font):
-        newFont = QFont(font)
-        newFont.setPointSizeF(self.m_fontSize)
-        self.m_graph.activeTheme().setFont(newFont)
-
-    def shadowQualityUpdatedByVisual(self, sq):
-        self.shadowQualityChanged.emit(int(sq))
-
-    def changeShadowQuality(self, quality):
-        sq = QAbstract3DGraph.ShadowQuality(quality)
-        self.m_graph.setShadowQuality(sq)
-
-    def setBackgroundEnabled(self, enabled):
-        self.m_graph.activeTheme().setBackgroundEnabled(enabled)
-
-    def setGridEnabled(self, enabled):
-        self.m_graph.activeTheme().setGridEnabled(enabled)
-
-    def toggleItemCount(self):
-        if self.m_itemCount == self.numberOfItems:
-            self.m_itemCount = self.lowerNumberOfItems
-            self.m_curveDivider = self.lowerCurveDivider
-        else:
-            self.m_itemCount = self.numberOfItems
-            self.m_curveDivider = self.curveDivider
-
-        self.m_graph.seriesList()[0].dataProxy().resetArray(None)
-        self.addData()
-
-
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     import sys
-
-    app = QApplication(sys.argv)
-    graph = Q3DScatter()
-    container = QWidget.createWindowContainer(graph)
-
-    screenSize = graph.screen().size()
-    container.setMinimumSize(
-            QSize(screenSize.width() / 2, screenSize.height() / 1.5))
-    container.setMaximumSize(screenSize)
-    container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    container.setFocusPolicy(Qt.StrongFocus)
-
-    widget = QWidget()
-    hLayout = QHBoxLayout(widget)
-    vLayout = QVBoxLayout()
-    hLayout.addWidget(container, 1)
-    hLayout.addLayout(vLayout)
-
-    widget.setWindowTitle("A Cosine Wave")
-
-    themeList = QComboBox()
-    themeList.addItem("Qt")
-    themeList.addItem("Primary Colors")
-    themeList.addItem("Digia")
-    themeList.addItem("Stone Moss")
-    themeList.addItem("Army Blue")
-    themeList.addItem("Retro")
-    themeList.addItem("Ebony")
-    themeList.addItem("Isabelle")
-    themeList.setCurrentIndex(6)
-
-    labelButton = QPushButton("Change label style")
-
-    smoothCheckBox = QCheckBox("Smooth dots", checked=True)
-
-    itemStyleList = QComboBox()
-    itemStyleList.addItem("Sphere", QAbstract3DSeries.MeshSphere)
-    itemStyleList.addItem("Cube", QAbstract3DSeries.MeshCube)
-    itemStyleList.addItem("Minimal", QAbstract3DSeries.MeshMinimal)
-    itemStyleList.addItem("Point", QAbstract3DSeries.MeshPoint)
-    itemStyleList.setCurrentIndex(0)
-
-    cameraButton = QPushButton("Change camera preset")
-
-    itemCountButton = QPushButton("Toggle item count")
-
-    backgroundCheckBox = QCheckBox("Show background", checked=True)
-
-    gridCheckBox = QCheckBox("Show grid", checked=True)
-
-    shadowQuality = QComboBox()
-    shadowQuality.addItem("None")
-    shadowQuality.addItem("Low")
-    shadowQuality.addItem("Medium")
-    shadowQuality.addItem("High")
-    shadowQuality.addItem("Low Soft")
-    shadowQuality.addItem("Medium Soft")
-    shadowQuality.addItem("High Soft")
-    shadowQuality.setCurrentIndex(4)
-
-    fontList = QFontComboBox()
-    fontList.setCurrentFont(QFont('Arial'))
-
-    vLayout.addWidget(labelButton, 0, Qt.AlignTop)
-    vLayout.addWidget(cameraButton, 0, Qt.AlignTop)
-    vLayout.addWidget(itemCountButton, 0, Qt.AlignTop)
-    vLayout.addWidget(backgroundCheckBox)
-    vLayout.addWidget(gridCheckBox)
-    vLayout.addWidget(smoothCheckBox, 0, Qt.AlignTop)
-    vLayout.addWidget(QLabel("Change dot style"))
-    vLayout.addWidget(itemStyleList)
-    vLayout.addWidget(QLabel("Change theme"))
-    vLayout.addWidget(themeList)
-    vLayout.addWidget(QLabel("Adjust shadow quality"))
-    vLayout.addWidget(shadowQuality)
-    vLayout.addWidget(QLabel("Change font"))
-    vLayout.addWidget(fontList, 1, Qt.AlignTop)
-
-    modifier = ScatterDataModifier(graph)
-
-    cameraButton.clicked.connect(modifier.changePresetCamera)
-    labelButton.clicked.connect(modifier.changeLabelStyle)
-    itemCountButton.clicked.connect(modifier.toggleItemCount)
-
-    backgroundCheckBox.stateChanged.connect(modifier.setBackgroundEnabled)
-    gridCheckBox.stateChanged.connect(modifier.setGridEnabled)
-    smoothCheckBox.stateChanged.connect(modifier.setSmoothDots)
-
-    modifier.backgroundEnabledChanged.connect(backgroundCheckBox.setChecked)
-    modifier.gridEnabledChanged.connect(gridCheckBox.setChecked)
-    itemStyleList.currentIndexChanged.connect(modifier.changeStyle)
-
-    themeList.currentIndexChanged.connect(modifier.changeTheme)
-
-    shadowQuality.currentIndexChanged.connect(modifier.changeShadowQuality)
-
-    modifier.shadowQualityChanged.connect(shadowQuality.setCurrentIndex)
-    graph.shadowQualityChanged.connect(modifier.shadowQualityUpdatedByVisual)
-
-    fontList.currentFontChanged.connect(modifier.changeFont)
-
-    modifier.fontChanged.connect(fontList.setCurrentFont)
-
-    widget.show()
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
     sys.exit(app.exec_())
