@@ -187,6 +187,7 @@ class Ui_MainWindow(object):
         self.actionSave_As.setIcon(icon2)
         self.actionSave_As.setObjectName("actionSave_As")
         self.actionAdd_Data = QtWidgets.QAction(MainWindow)
+
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap("../../../PycharmProjects/DesktopApplication/res/images/icons/insertdataset.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionAdd_Data.setIcon(icon3)
@@ -279,6 +280,8 @@ class Ui_MainWindow(object):
         self.actionExit_Application.setText(_translate("MainWindow", "Exit Application"))
         self.actionDownload_data.setText(_translate("MainWindow", "Download data"))
 
+        self.actionAdd_Data.triggered.connect(self.file_open)
+
 
     def update_annot(self,line, annot, ind,label):
         x, y = line.get_data()
@@ -341,6 +344,8 @@ class Ui_MainWindow(object):
         self.DataSet1.toggled.connect(lambda: self.setMainDataSet(self.DATASETARRAY[0]))
 
         self.DataSet2.toggled.connect(lambda: self.setMainDataSet(self.DATASETARRAY[1]))
+
+
 
     def addDataSet(self,dataSet):
         self.DATASETARRAY.append(dataSet)
@@ -430,7 +435,7 @@ class Ui_MainWindow(object):
                 text = "RSP"
                 self.Channellabels.append(text)
 
-            self.fig.canvas.draw_idle()
+
 
 
             for ax in self.AXISET:
@@ -446,6 +451,8 @@ class Ui_MainWindow(object):
 
 
             self.LINE_DIC = dict(zip(self.AXISET, self.LINES))
+
+            self.fig.canvas.draw_idle()
 
 
         else:
@@ -480,7 +487,7 @@ class Ui_MainWindow(object):
         self.DATASETARRAY = [dataset1, dataset2]
 
        # self.DataSet1.setChecked(True)
-        self.DataSet1.toggled.connect(lambda: self.setMainDataSet(dataset1))
+
 
 
 
@@ -511,6 +518,9 @@ class Ui_MainWindow(object):
         self.RenderPlots(dataSet)
 
 
+    def file_open(self):
+
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow, "Open File")
 
 
     def hover(self,event):
