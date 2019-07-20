@@ -1,25 +1,31 @@
+"""""
 
+Desktop Application for visualising physiological data
 
+@author Thethela Faltein
+
+"""""
+
+######Imports#################
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 from src.DataSet import DataSet
-
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
-
 from PyQt5.QtWidgets import QMainWindow, QLabel, QCheckBox, QWidget
 from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QTimer
 import matplotlib.pyplot as plt
-
 import numpy as np; np.random.seed(1)
+
+####Imports#####################
 
 
 class Ui_MainWindow(object):
 
 
-    ##SETTING UP THE MAIN WINDOW
+    ##SETTING UP THE MAIN WINDOW WITH ELEMENTS
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -226,21 +232,18 @@ class Ui_MainWindow(object):
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionExit_Application)
 
-
-        self.retranslateUi(MainWindow)
-
-
         self.InitialiseElements()
 
-        self.Test()
+        self.retranslateUi(MainWindow)
 
         self.RenderPlots(self.INUSEDATASET)
 
 
+
+        self.Test()
+
+
         self.fig.canvas.mpl_connect("motion_notify_event", self.hover)
-
-
-
 
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -251,13 +254,18 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Data Set(s)</span></p></body></html>"))
         self.DataSet1.setText(_translate("MainWindow", "DataSet1"))
         self.DataSet2.setText(_translate("MainWindow", "DataSet2"))
-        self.datasetInfo.setText(_translate("MainWindow", "datasetinfo"))
+        self.datasetInfo.setText(_translate("MainWindow", "Information on the dataset(s)\n######################\nAverage:\nStandard Deviation:"))
         self.Channels.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Channels</span></p></body></html>"))
         self.EDA.setText(_translate("MainWindow", "EDA"))
         self.ECG.setText(_translate("MainWindow", "ECG"))
         self.RSP.setText(_translate("MainWindow", "RSP"))
         self.PPG.setText(_translate("MainWindow", "PPG"))
-        self.ChannelsInfo.setText(_translate("MainWindow", "ChannelInfo"))
+        self.Channels.setToolTip("Physiological measurements taken")
+        self.EDA.setToolTip("Electrodermal activity (EDA) is a measure of neurally mediated effects on sweat gland permeability, observed as changes in the resistance of the skin to a small electrical current, or as differences in the electrical potential between different parts of the skin.")
+        self.ECG.setToolTip("Electrocardiogram (ECG),electrical activity of the heart")
+        self.RSP.setToolTip("Respiration (RSP),measurement of  abdominal or thoracic expansion and contraction while breathing.")
+        self.PPG.setToolTip("Photoplethysmogram (PPG),detects blood volume changes in the microvascular bed of tissue")
+        self.ChannelsInfo.setText(_translate("MainWindow","Information on the Channels\n#####################\nAverage:\nStandard Deviation:" ))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuInsert.setTitle(_translate("MainWindow", "Insert"))
         self.menuWindow.setTitle(_translate("MainWindow", "Window"))
@@ -275,49 +283,10 @@ class Ui_MainWindow(object):
         self.actionDownload_data.setText(_translate("MainWindow", "Download data"))
 
 
-    def setDataVisVariables(self):
-
-        self.TIME=np.sort(np.random.rand(15)) ## constant  for all datasets
-
-
-        ###Example###
-
-        eda1 = np.sort(np.random.rand(15))
-        eda2 = np.sort(np.random.rand(15))
-        ppg1=np.sort(np.random.rand(15))
-        ppg2=np.sort(np.random.rand(15))
-        ecg1=np.sort(np.random.rand(15))
-        ecg2=np.sort(np.random.rand(15))
-        rsp1=np.sort(np.random.rand(15))
-        rsp2=np.sort(np.random.rand(15))
-
-        dataset1 = DataSet(eda1,ecg1,rsp1,ppg1,self.DataSet1)
-
-        dataset2 = DataSet(eda2,ecg2,rsp2,ppg2,self.DataSet2)
-
-        self.DATASETARRAY = [dataset1,dataset2]
-
-        self.DataSet1.setChecked(True)
-
-        self.INUSEDATASET = dataset1
-
-        self.fig = plt.figure()
-
-        self.ANNOTS = []
-
-        self.LINE_DIC = []
-
-        self.ANNOTS_DIC = []
-
-        self.AXISET=[]
-
-        self.LINES=[]
-
-
     def update_annot(self,line, annot, ind,label):
         x, y = line.get_data()
         annot.xy = (x[ind["ind"][0]], y[ind["ind"][0]])
-        text = "x = {}\ny= {}".format(x[ind["ind"][0]], y[ind["ind"][0]]) + label
+        text =label+"\n"+"x = {}\ny= {}".format(x[ind["ind"][0]], y[ind["ind"][0]])
         annot.set_text(text)
 
 
@@ -342,7 +311,7 @@ class Ui_MainWindow(object):
 
         #### Initialising the plot area ####
 
-        self.fig = plt.figure(figsize=(10,7))
+        self.fig = plt.figure(figsize=(10,5))
 
         self.FirgureCanvas = FigureCanvas(self.fig)
 
@@ -352,12 +321,12 @@ class Ui_MainWindow(object):
 
         self.Navtoolbar =NavigationToolbar(self.FirgureCanvas, self.NavtoolWidget)
 
+
         self.verticalLayout_7.addWidget(self.FirgureCanvas)
 
         self.verticalLayout_7.addWidget(self.NavtoolWidget)
 
         self.HOVER=False
-
 
 
         ## linking the channels to the methods
@@ -367,6 +336,10 @@ class Ui_MainWindow(object):
         self.RSP.stateChanged.connect(lambda: self.RenderPlots(self.INUSEDATASET))
 
         self.EDA.stateChanged.connect(lambda: self.RenderPlots(self.INUSEDATASET))
+
+        self.DataSet1.toggled.connect(lambda: self.setMainDataSet(self.DATASETARRAY[0]))
+
+        self.DataSet2.toggled.connect(lambda: self.setMainDataSet(self.DATASETARRAY[1]))
 
     def addDataSet(self,dataSet):
         self.DATASETARRAY.append(dataSet)
@@ -383,12 +356,15 @@ class Ui_MainWindow(object):
 
         self.HOVER=False
 
+        plt.clf()
+
         if dataSet!= None:
+
+            print("none")
 
 
             self.HOVER=True
 
-            plt.clf()
 
             self.ANNOTS.clear()
             self.LINE_DIC.clear()
@@ -399,18 +375,23 @@ class Ui_MainWindow(object):
             self.Channellabels = []
 
 
-
             self.subPlot = plt.subplot(1, 1, 1)
+
+            self.subPlot.get_xaxis().tick_bottom()
+            self.subPlot.get_yaxis().tick_left()
+
+            #   plt.style.use('fivethirtyeight')
 
             plt.xlabel('Time', fontsize=10)
             plt.ylabel('Volts', fontsize=10)
+
 
 
             if self.EDA.isChecked() == True:
 
                 self.ax1EDA = self.subPlot.twinx()  # EDA
                 self.LineEDA, = self.ax1EDA.plot(dataSet.getEDAdata(), self.TIME)
-                self.ax1EDA.tick_params(axis='y', labelcolor='green')
+              #  self.ax1EDA.tick_params(axis='y', labelcolor='green')
                 self.LINES.append(self.LineEDA)
                 self.AXISET.append(self.ax1EDA)
                 text = "EDA"
@@ -421,7 +402,7 @@ class Ui_MainWindow(object):
 
                 self.ax2ECG = self.subPlot.twinx()  # ECG
                 self.LineECG, = self.ax2ECG.plot(dataSet.getECGdata(),self.TIME, color = "yellow")
-                self.ax2ECG.tick_params(axis='y', labelcolor='green')
+               # self.ax2ECG.tick_params(axis='y', labelcolor='green')
                 self.LINES.append(self.LineECG)
                 self.AXISET.append(self.ax2ECG)
                 text = "ECG"
@@ -431,8 +412,8 @@ class Ui_MainWindow(object):
             if self.PPG.isChecked() == True:
 
                 self.ax3PPG = self.subPlot.twinx() #PPG
-                self.LinePPG, = self.ax3PPG.plot(dataSet.getPPGdata(), self.TIME, color = "blue")
-                self.ax3PPG.tick_params(axis='y', labelcolor='green')
+                self.LinePPG, = self.ax3PPG.plot(dataSet.getPPGdata(), self.TIME, color = "pink")
+               # self.ax3PPG.tick_params(axis='y', labelcolor='green')
                 self.LINES.append(self.LinePPG)
                 self.AXISET.append(self.ax3PPG)
                 text = "PPG"
@@ -443,17 +424,18 @@ class Ui_MainWindow(object):
 
                 self.ax4RSP = self.subPlot.twinx()
                 self.LineRSP, = self.ax4RSP.plot(dataSet.getRSPdata(),self.TIME, color = "orange")
-                self.ax4RSP.tick_params(axis='y', labelcolor='green')
+              #  self.ax4RSP.tick_params(axis='y', labelcolor='green')
                 self.LINES.append(self.LineRSP)
                 self.AXISET.append(self.ax4RSP)
                 text = "RSP"
                 self.Channellabels.append(text)
 
+            self.fig.canvas.draw_idle()
 
 
             for ax in self.AXISET:
 
-                annot = self.subPlot.annotate("", xy=(0, 0), xytext=(-20, 20), textcoords="offset points",
+                annot = self.subPlot.annotate("", xy=(0, 0), xytext=(-10, 10), textcoords="offset points",
                                           bbox=dict(boxstyle="round", fc="w", alpha=0.4),
                                           arrowprops=dict(arrowstyle="->"))
                 annot.set_visible(False)
@@ -462,8 +444,6 @@ class Ui_MainWindow(object):
 
             self.ANNOTS_DIC = dict(zip(self.AXISET, self.ANNOTS))
             self.LINE_DIC = dict(zip(self.AXISET, self.LINES))
-
-
 
 
     def Test(self):
@@ -489,8 +469,12 @@ class Ui_MainWindow(object):
         self.DATASETARRAY = [dataset1, dataset2]
 
         self.DataSet1.setChecked(True)
+        self.DataSet1.toggled.connect(lambda: self.setMainDataSet(dataset1))
 
-        self.INUSEDATASET = dataset1
+
+
+
+       # self.INUSEDATASET = dataset1
 
 
 
@@ -509,6 +493,15 @@ class Ui_MainWindow(object):
             return "RSP"
 
 
+    def setMainDataSet(self,dataSet):
+
+        self.INUSEDATASET=dataSet
+
+        self.RenderPlots(dataSet)
+
+
+
+
     def hover(self,event):
 
         if(self.HOVER==True):
@@ -525,6 +518,13 @@ class Ui_MainWindow(object):
                         if annot.get_visible():
                             annot.set_visible(False)
                             self.fig.canvas.draw_idle()
+
+
+
+    def TimerRender(self):
+
+        if self.INUSEDATASET!=None:
+            self.RenderPlots(self.INUSEDATASET)
 
 
 
