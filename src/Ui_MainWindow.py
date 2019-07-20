@@ -238,10 +238,7 @@ class Ui_MainWindow(object):
 
         self.RenderPlots(self.INUSEDATASET)
 
-
-
         self.Test()
-
 
         self.fig.canvas.mpl_connect("motion_notify_event", self.hover)
 
@@ -328,6 +325,10 @@ class Ui_MainWindow(object):
 
         self.HOVER=False
 
+        self.EDA.setChecked(False)
+        self.PPG.setChecked(False)
+        self.RSP.setChecked(False)
+        self.ECG.setChecked(False)
 
         ## linking the channels to the methods
 
@@ -354,13 +355,17 @@ class Ui_MainWindow(object):
     def RenderPlots(self,dataSet):
 
 
+
         self.HOVER=False
 
         plt.clf()
 
         if dataSet!= None:
 
-            print("none")
+            self.EDA.setEnabled(True)
+            self.ECG.setEnabled(True)
+            self.PPG.setEnabled(True)
+            self.RSP.setEnabled(True)
 
 
             self.HOVER=True
@@ -371,7 +376,6 @@ class Ui_MainWindow(object):
             self.ANNOTS_DIC.clear()
             self.AXISET.clear()
             self.LINES.clear()
-
             self.Channellabels = []
 
 
@@ -380,12 +384,8 @@ class Ui_MainWindow(object):
             self.subPlot.get_xaxis().tick_bottom()
             self.subPlot.get_yaxis().tick_left()
 
-            #   plt.style.use('fivethirtyeight')
-
             plt.xlabel('Time', fontsize=10)
             plt.ylabel('Volts', fontsize=10)
-
-
 
             if self.EDA.isChecked() == True:
 
@@ -443,7 +443,18 @@ class Ui_MainWindow(object):
                 self.ANNOTS.append(annot)
 
             self.ANNOTS_DIC = dict(zip(self.AXISET, self.ANNOTS))
+
+
             self.LINE_DIC = dict(zip(self.AXISET, self.LINES))
+
+
+        else:
+
+            self.EDA.setEnabled(False)
+            self.ECG.setEnabled(False)
+            self.PPG.setEnabled(False)
+            self.RSP.setEnabled(False)
+
 
 
     def Test(self):
@@ -468,7 +479,7 @@ class Ui_MainWindow(object):
 
         self.DATASETARRAY = [dataset1, dataset2]
 
-        self.DataSet1.setChecked(True)
+       # self.DataSet1.setChecked(True)
         self.DataSet1.toggled.connect(lambda: self.setMainDataSet(dataset1))
 
 
@@ -521,10 +532,6 @@ class Ui_MainWindow(object):
 
 
 
-    def TimerRender(self):
-
-        if self.INUSEDATASET!=None:
-            self.RenderPlots(self.INUSEDATASET)
 
 
 
