@@ -400,7 +400,7 @@ class Ui_MainWindow(object):
             if self.EDA.isChecked() == True:
 
                 self.ax1EDA = self.subPlot.twinx()  # EDA
-                self.LineEDA, = self.ax1EDA.plot(dataSet.getEDAdata(), self.TIME, color='green')
+                self.LineEDA, = self.ax1EDA.plot(dataSet.getEDAdata(), self.TIME, color='blue')
                 self.LineEDA.set_label('EDA')
                 self.LINES.append(self.LineEDA)
                 self.AXISET.append(self.ax1EDA)
@@ -411,7 +411,7 @@ class Ui_MainWindow(object):
             if self.ECG.isChecked() == True:
 
                 self.ax2ECG = self.subPlot.twinx()  # ECG
-                self.LineECG, = self.ax2ECG.plot(dataSet.getECGdata(),self.TIME, color = "yellow")
+                self.LineECG, = self.ax2ECG.plot(dataSet.getECGdata(),self.TIME, color = "red")
                 self.LineECG.set_label('ECG')
                 self.LINES.append(self.LineECG)
                 self.AXISET.append(self.ax2ECG)
@@ -422,7 +422,7 @@ class Ui_MainWindow(object):
             if self.PPG.isChecked() == True:
 
                 self.ax3PPG = self.subPlot.twinx() #PPG
-                self.LinePPG, = self.ax3PPG.plot(dataSet.getPPGdata(), self.TIME, color = "pink")
+                self.LinePPG, = self.ax3PPG.plot(dataSet.getPPGdata(), self.TIME, color = "purple")
                 self.LinePPG.set_label('PPG')
                 self.LINES.append(self.LinePPG)
                 self.AXISET.append(self.ax3PPG)
