@@ -259,7 +259,7 @@ class Ui_MainWindow(object):
         self.RSP.setText(_translate("MainWindow", "RSP"))
         self.PPG.setText(_translate("MainWindow", "PPG"))
         self.Channels.setToolTip("Physiological measurements taken")
-        self.EDA.setToolTip("Electrodermal activity (EDA) is a measure of neurally mediated effects on sweat gland permeability, observed as changes in the resistance of the skin to a small electrical current, or as differences in the electrical potential between different parts of the skin.")
+        self.EDA.setToolTip("Electrodermal activity (EDA) is a measure of neurally mediated effects on sweat gland permeability\n, observed as changes in the resistance of the skin to a small electrical current,\n or as differences in the electrical potential between different parts of the skin.")
         self.ECG.setToolTip("Electrocardiogram (ECG),electrical activity of the heart")
         self.RSP.setToolTip("Respiration (RSP),measurement of  abdominal or thoracic expansion and contraction while breathing.")
         self.PPG.setToolTip("Photoplethysmogram (PPG),detects blood volume changes in the microvascular bed of tissue")
@@ -389,14 +389,19 @@ class Ui_MainWindow(object):
             self.subPlot.get_xaxis().tick_bottom()
             self.subPlot.get_yaxis().tick_left()
 
+            plt.title('Channel(s) vs Time', fontsize=10)
             plt.xlabel('Time', fontsize=10)
             plt.ylabel('Volts', fontsize=10)
+            self.ax1EDA = None
+            self.ax2ECG = None
+            self.ax3PPG = None
+            self.ax4RSP = None
 
             if self.EDA.isChecked() == True:
 
                 self.ax1EDA = self.subPlot.twinx()  # EDA
-                self.LineEDA, = self.ax1EDA.plot(dataSet.getEDAdata(), self.TIME)
-              #  self.ax1EDA.tick_params(axis='y', labelcolor='green')
+                self.LineEDA, = self.ax1EDA.plot(dataSet.getEDAdata(), self.TIME, color='green')
+                self.LineEDA.set_label('EDA')
                 self.LINES.append(self.LineEDA)
                 self.AXISET.append(self.ax1EDA)
                 text = "EDA"
@@ -407,7 +412,7 @@ class Ui_MainWindow(object):
 
                 self.ax2ECG = self.subPlot.twinx()  # ECG
                 self.LineECG, = self.ax2ECG.plot(dataSet.getECGdata(),self.TIME, color = "yellow")
-               # self.ax2ECG.tick_params(axis='y', labelcolor='green')
+                self.LineECG.set_label('ECG')
                 self.LINES.append(self.LineECG)
                 self.AXISET.append(self.ax2ECG)
                 text = "ECG"
@@ -418,7 +423,7 @@ class Ui_MainWindow(object):
 
                 self.ax3PPG = self.subPlot.twinx() #PPG
                 self.LinePPG, = self.ax3PPG.plot(dataSet.getPPGdata(), self.TIME, color = "pink")
-               # self.ax3PPG.tick_params(axis='y', labelcolor='green')
+                self.LinePPG.set_label('PPG')
                 self.LINES.append(self.LinePPG)
                 self.AXISET.append(self.ax3PPG)
                 text = "PPG"
@@ -427,13 +432,17 @@ class Ui_MainWindow(object):
 
             if self.RSP.isChecked() == True:
 
-                self.ax4RSP = self.subPlot.twinx()
+                self.ax4RSP = self.subPlot.twinx() #RSP
                 self.LineRSP, = self.ax4RSP.plot(dataSet.getRSPdata(),self.TIME, color = "orange")
-              #  self.ax4RSP.tick_params(axis='y', labelcolor='green')
+                self.LineRSP.set_label('RSP')
                 self.LINES.append(self.LineRSP)
                 self.AXISET.append(self.ax4RSP)
                 text = "RSP"
                 self.Channellabels.append(text)
+
+
+            if self.LINES != [] and self.Channellabels != []:
+                plt.legend(self.LINES,self.Channellabels)
 
 
 
@@ -521,6 +530,11 @@ class Ui_MainWindow(object):
     def file_open(self):
 
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow, "Open File")
+
+
+    def insertDataSet(self,filename):
+
+        print(filename)
 
 
     def hover(self,event):
