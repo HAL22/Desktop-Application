@@ -18,6 +18,8 @@ from PyQt5.QtCore import QSize
 from PyQt5.QtCore import QTimer
 import matplotlib.pyplot as plt
 import numpy as np; np.random.seed(1)
+# Reading an excel file using Python
+import xlrd
 
 ####Imports#####################
 
@@ -308,6 +310,10 @@ class Ui_MainWindow(object):
 
         self.LINES = []
 
+        self.RADIOBUTTONS = []
+
+        self.numDataSet =0
+
 
         #### Initialising the plot area ####
 
@@ -399,8 +405,10 @@ class Ui_MainWindow(object):
 
             if self.EDA.isChecked() == True:
 
-                self.ax1EDA = self.subPlot.twinx()  # EDA
-                self.LineEDA, = self.ax1EDA.plot(dataSet.getEDAdata(), self.TIME, color='blue')
+                self.ax1EDA = self.subPlot.twinx() # EDA
+                self.LineEDA, = self.ax1EDA.plot(np.array(dataSet.getTime()),np.array(dataSet.getNormEDA()), color='blue')
+
+
                 self.LineEDA.set_label('EDA')
                 self.LINES.append(self.LineEDA)
                 self.AXISET.append(self.ax1EDA)
@@ -410,8 +418,8 @@ class Ui_MainWindow(object):
 
             if self.ECG.isChecked() == True:
 
-                self.ax2ECG = self.subPlot.twinx()  # ECG
-                self.LineECG, = self.ax2ECG.plot(dataSet.getECGdata(),self.TIME, color = "red")
+                self.ax2ECG = self.subPlot  # ECG
+                self.LineECG, = self.ax2ECG.plot(np.array(dataSet.getTime()),np.array(dataSet.getNormECG()), color = "red")
                 self.LineECG.set_label('ECG')
                 self.LINES.append(self.LineECG)
                 self.AXISET.append(self.ax2ECG)
@@ -421,8 +429,8 @@ class Ui_MainWindow(object):
 
             if self.PPG.isChecked() == True:
 
-                self.ax3PPG = self.subPlot.twinx() #PPG
-                self.LinePPG, = self.ax3PPG.plot(dataSet.getPPGdata(), self.TIME, color = "purple")
+                self.ax3PPG = self.subPlot #PPG
+                self.LinePPG, = self.ax3PPG.plot(np.array(dataSet.getTime()),np.array(dataSet.getNormPPG()) , color = "purple")
                 self.LinePPG.set_label('PPG')
                 self.LINES.append(self.LinePPG)
                 self.AXISET.append(self.ax3PPG)
@@ -433,7 +441,7 @@ class Ui_MainWindow(object):
             if self.RSP.isChecked() == True:
 
                 self.ax4RSP = self.subPlot.twinx() #RSP
-                self.LineRSP, = self.ax4RSP.plot(dataSet.getRSPdata(),self.TIME, color = "orange")
+                self.LineRSP, = self.ax4RSP.plot(dataSet.getRSPdata(),dataSet.Time, color = "orange")
                 self.LineRSP.set_label('RSP')
                 self.LINES.append(self.LineRSP)
                 self.AXISET.append(self.ax4RSP)
@@ -443,9 +451,6 @@ class Ui_MainWindow(object):
 
             if self.LINES != [] and self.Channellabels != []:
                 plt.legend(self.LINES,self.Channellabels)
-
-
-
 
             for ax in self.AXISET:
 
@@ -489,9 +494,11 @@ class Ui_MainWindow(object):
         rsp1 = np.sort(np.random.rand(100))
         rsp2 = np.sort(np.random.rand(100))
 
-        dataset1 = DataSet(eda1, ecg1, rsp1, ppg1, self.DataSet1)
+        dataset1 = DataSet(self.TIME,eda1, ecg1, rsp1, ppg1, self.DataSet1)
 
-        dataset2 = DataSet(eda2, ecg2, rsp2, ppg2, self.DataSet2)
+        dataset2 = DataSet(self.TIME,eda2, ecg2, rsp2, ppg2, self.DataSet2)
+
+        self.numDataSet=self.numDataSet+2
 
         self.DATASETARRAY = [dataset1, dataset2]
 
@@ -531,10 +538,70 @@ class Ui_MainWindow(object):
 
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow, "Open File")
 
+        self.read_data(filename)
 
-    def insertDataSet(self,filename):
 
-        print(filename)
+    def read_data(self,filename):
+
+        eda = []
+        ecg = []
+        rsp = []
+        ppg = []
+
+        time =[]
+
+
+        wb = xlrd.open_workbook(filename)
+        sheet = wb.sheet_by_index(0)
+
+        for i in range(sheet.ncols):
+            for j in range(sheet.nrows):
+
+                if i==0:
+                    time.append(sheet.cell_value(j,i))
+
+                if i==1:
+                    ppg.append(sheet.cell_value(j,i))
+
+                if i==2:
+                    rsp.append(sheet.cell_value(j,i))
+
+                if i==3:
+                    eda.append(sheet.cell_value(j,i))
+
+                if i==4:
+                    ecg.append(sheet.cell_value(j,i))
+
+        self.createButton(eda,ecg,rsp,ppg,time)
+
+
+
+    def createButton(self,eda,ecg,rsp,ppg,time):
+
+        _translate = QtCore.QCoreApplication.translate
+
+
+
+        name = "DataSet"+str(self.numDataSet+1)
+        self.numDataSet=self.numDataSet+1;
+
+
+
+
+        radiobutton = QtWidgets.QRadioButton(self.left_left_scrollarea_widget)
+        radiobutton.setObjectName(name)
+        radiobutton.setText(_translate("MainWindow", name))
+
+        self.verticalLayout_3.addWidget(radiobutton)
+
+        dataset = DataSet(time, eda, ecg, rsp, ppg,radiobutton)
+
+        radiobutton.toggled.connect(lambda: self.setMainDataSet(dataset))
+
+
+        self.RADIOBUTTONS.append(radiobutton)
+
+        self.DATASETARRAY.append(dataset)
 
 
     def hover(self,event):

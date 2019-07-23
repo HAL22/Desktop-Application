@@ -9,15 +9,15 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class DataSet():
 
-    def __init__(self,EDAdata,ECGdata,RSPdata,PPGdata,RadioButton):
+    def __init__(self,Time,EDAdata,ECGdata,RSPdata,PPGdata,RadioButton):
 
-        self.EDAdata=EDAdata
-        self.ECGdata=ECGdata
+        self.EDAdata=self.convert_EDA(EDAdata)
+        self.ECGdata= self.convert_ECG(ECGdata)
         self.RSPdata=RSPdata
         self.PPGdata=PPGdata
         self.RadioButton=RadioButton
 
-        self.Time = None
+        self.Time = Time
 
         self.Min = None
 
@@ -86,4 +86,54 @@ class DataSet():
 
     def setRadioButton(self,RadioButton):
         self.RadioButton=RadioButton
+
+    def getTime(self):
+        return self.Time
+
+
+    def setTime(self,time):
+
+        self.Time=time
+
+
+    def getNormEDA(self):
+        return self.NormEDA
+
+    def setNormEDA(self,normeda):
+        self.NormEDA=normeda
+
+    def getNormECG(self):
+        return self.NormECG
+
+    def setNormECG(self,ecg):
+        self.NormECG = ecg
+
+    def getNormPPG(self):
+        return self.NormPPG
+
+    def setNormPPG(self,normppg):
+        self.NormPPG=normppg
+
+
+
+
+    def convert_EDA(self,con_eda):
+
+        eda = []
+
+        for x in con_eda:
+            eda.append((x/1000000))
+
+        return eda
+
+    def convert_ECG(self,con_ecg):
+
+        ecg = []
+
+        for x in con_ecg:
+            ecg.append((x/1000))
+
+        return ecg
+
+
 
