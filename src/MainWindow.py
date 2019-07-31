@@ -84,10 +84,10 @@ class Ui_MainWindow(object):
         self.TransformLabel.setMaximumSize(QtCore.QSize(16777215, 21))
         self.TransformLabel.setObjectName("TransformLabel")
         self.verticalLayout.addWidget(self.TransformLabel)
-        self.Line_Graphs_Overlayed = QtWidgets.QCheckBox(self.scrollAreaWidgetContents)
+        self.Line_Graphs_Overlayed = QtWidgets.QRadioButton(self.scrollAreaWidgetContents)
         self.Line_Graphs_Overlayed.setObjectName("Line_Graphs_Overlayed")
         self.verticalLayout.addWidget(self.Line_Graphs_Overlayed)
-        self.Line_Graphs_Normalized = QtWidgets.QCheckBox(self.scrollAreaWidgetContents)
+        self.Line_Graphs_Normalized =QtWidgets.QRadioButton(self.scrollAreaWidgetContents)
         self.Line_Graphs_Normalized.setObjectName("Line_Graphs_Normalized")
         self.verticalLayout.addWidget(self.Line_Graphs_Normalized)
         self.LineBreakerTransform = QtWidgets.QLabel(self.scrollAreaWidgetContents)
@@ -239,6 +239,16 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionExit_Application)
 
         self.retranslateUi(MainWindow)
+        self.setUpVariables()
+        self.InitWindow()
+
+        self.Test()
+
+
+        self.Events()
+
+        self.fig.canvas.mpl_connect("motion_notify_event", self.hover)
+
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -272,13 +282,26 @@ class Ui_MainWindow(object):
         self.actionDownload_data.setText(_translate("MainWindow", "Download data"))
 
 
+
+
+
     def InitWindow(self):
 
-        self.EDA.isChecked(False)
-        self.ECG.isChecked(False)
-        self.RSP.isChecked(False)
-        self.PPG.isChecked(False)
+        self.EDA.setChecked(False)
+        self.ECG.setChecked(False)
+        self.RSP.setChecked(False)
+        self.PPG.setChecked(False)
 
+        self.verticalLayout_7.addWidget(self.FirgureCanvas)
+        self.verticalLayout_7.addWidget(self.Navtoolbar)
+
+        self.EDA.setEnabled(False)
+        self.ECG.setEnabled(False)
+        self.PPG.setEnabled(False)
+        self.RSP.setEnabled(False)
+
+        self.Line_Graphs_Normalized.setEnabled(False)
+        self.Line_Graphs_Overlayed.setEnabled(False)
 
     def setUpVariables(self):
 
@@ -292,13 +315,16 @@ class Ui_MainWindow(object):
         self.ANNOTS_DIC = []
         self.AXISET = []
         self.LINES = []
+        self.Channellabels = []
 
         self.RadioButtonsArray= [] ## Will store the radio buttons used in the window
 
-        self.numDataSet = 0 ## Number of data sets
+        self.numDataSet = 2 ## Number of data sets
+
+
 
         #### Initialising the plot area ####
-        self.fig = plt.figure(figsize=(20, 5))
+        self.fig = plt.figure(figsize=(50, 50))
         self.FirgureCanvas = FigureCanvas(self.fig)
         ## Intialise Navigation toolbar
         self.NavtoolWidget = QWidget()
@@ -306,6 +332,393 @@ class Ui_MainWindow(object):
 
         self.HOVER = False ## Activate tooltip
 
+        self.ax1EDA = None
+        self.ax2ECG = None
+        self.ax3PPG = None
+        self.ax4RSP = None
+
+        self.subPlot = plt.subplot(1, 1, 1)
+
+
+    def hover(self,event):
+
+        if(self.HOVER==True):
+
+            if event.inaxes in self.AXISET:
+                for ax in self.AXISET:
+                    cont, ind = self.LINE_DIC[ax].contains(event)
+                    annot = self.ANNOTS_DIC[ax]
+                    if cont:
+                        self.update_annot(self.LINE_DIC[ax], annot, ind,self.getChannelDescription(ax))
+                        annot.set_visible(True)
+                        self.fig.canvas.draw_idle()
+                    else:
+                        if annot.get_visible():
+                            annot.set_visible(False)
+                            self.fig.canvas.draw_idle()
+
+
+    def refresh(self):
+
+        self.fig.canvas.draw_idle()
+
+    def getChannelDescription(self,axis):
+
+        if axis == self.ax1EDA:
+            return "EDA"
+
+        if axis == self.ax2ECG:
+            return "ECG"
+
+        if axis == self.ax3PPG:
+            return "PPG"
+
+        if axis == self.ax4RSP:
+            return "RSP"
+
+    def renderLineGraphs(self,dataSet):
+
+        self.HOVER = False
+        plt.clf()
+
+        self.subPlot = plt.subplot(1, 1, 1)
+
+
+
+
+        if dataSet != None:
+
+            plt.title('Physiological data', fontsize=10)
+            plt.xlabel('Time in microsecond', fontsize=10)
+            plt.ylabel('Magnitude', fontsize=10)
+
+
+            self.InitLinePlotData()
+
+            if self.Line_Graphs_Overlayed.isChecked()==True:
+
+                self.HOVER=True
+
+
+                if self.EDA.isChecked() == True:
+                    self.ax1EDA = self.subPlot.twinx()
+
+                    self.LineEDA, = self.ax1EDA.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormEDA()),
+                                                     color='blue')
+
+                    self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
+
+                    self.LineEDA.set_label('EDA')
+                    self.LINES.append(self.LineEDA)
+                    self.AXISET.append(self.ax1EDA)
+                    text = "EDA"
+                    self.Channellabels.append(text)
+
+
+                if self.ECG.isChecked() == True:
+                    self.ax2ECG = self.subPlot.twinx()# ECG
+                    self.LineECG, = self.ax2ECG.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormECG()),
+                                                     color="red")
+
+                    self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+
+                    self.LineECG.set_label('ECG')
+                   # self.ax2ECG.tick_params(axis='y', labelcolor='red')
+                    self.LINES.append(self.LineECG)
+                    self.AXISET.append(self.ax2ECG)
+                    text = "ECG"
+                    self.Channellabels.append(text)
+
+                if self.PPG.isChecked() == True:
+
+                    self.ax3PPG = self.subPlot.twinx().twiny() # PPG
+
+                    self.LinePPG, = self.ax3PPG.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormPPG()),
+                                                     color="purple")
+
+                    self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
+
+                    self.LinePPG.set_label('PPG')
+                    #self.ax3PPG.tick_params(axis='y', labelcolor='purple')
+                    self.LINES.append(self.LinePPG)
+                    self.AXISET.append(self.ax3PPG)
+                    text = "PPG"
+                    self.Channellabels.append(text)
+
+
+                if self.RSP.isChecked() == True:
+                    self.ax4RSP = self.subPlot.twinx() # RSP
+
+                    self.LineRSP, = self.ax4RSP.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormRSP()),
+                                                     color="orange")
+
+                    self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
+
+                    self.LineRSP.set_label('RSP')
+                   # self.ax4RSP.tick_params(axis='y', labelcolor='orange')
+                    self.LINES.append(self.LineRSP)
+                    self.AXISET.append(self.ax4RSP)
+                    text = "RSP"
+                    self.Channellabels.append(text)
+
+                if self.LINES != [] and self.Channellabels != []:
+                    plt.legend(self.LINES, self.Channellabels)
+
+                for ax in self.AXISET:
+                    annot = self.subPlot.annotate("", xy=(0, 0), xytext=(0, 0), textcoords="offset points",
+                                                  bbox=dict(boxstyle="round", fc="w", alpha=0.4),
+                                                  arrowprops=dict(arrowstyle="->"))
+                    annot.set_visible(False)
+
+                    self.ANNOTS.append(annot)
+
+                self.ANNOTS_DIC = dict(zip(self.AXISET, self.ANNOTS))
+
+                self.LINE_DIC = dict(zip(self.AXISET, self.LINES))
+
+                ##plt.yticks(np.arange(dataSet.getMin(),dataSet.getMax(),0.1))
+
+                #output = output_start + ((output_end - output_start) / (input_end - input_start)) * (input - input_start)
+
+
+                self.subPlot.set_ylim(-1,dataSet.getNormMax()+1)
+
+
+                self.refresh()
+
+
+            elif self.Line_Graphs_Normalized.isChecked() == True:
+
+                plt.title('Channel(s) vs Time', fontsize=10)
+                plt.xlabel('Time', fontsize=10)
+                plt.ylabel('Volts', fontsize=10)
+
+                self.HOVER=True
+
+                if self.EDA.isChecked() == True:
+                    self.ax1EDA = self.subPlot  # EDA
+                    self.LineEDA, = self.ax1EDA.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormEDA()),
+                                                     color='blue')
+                    self.LineEDA.set_label('EDA')
+                    self.LINES.append(self.LineEDA)
+                    self.AXISET.append(self.ax1EDA)
+                    text = "EDA"
+                    self.Channellabels.append(text)
+
+                if self.ECG.isChecked() == True:
+                    self.ax2ECG = self.subPlot  # ECG
+                    self.LineECG, = self.ax2ECG.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormECG()),
+                                                     color="red")
+                    self.ax2ECG.tick_params(axis='y', labelcolor='red')
+                    self.LineECG.set_label('ECG')
+                    self.LINES.append(self.LineECG)
+                    self.AXISET.append(self.ax2ECG)
+                    text = "ECG"
+                    self.Channellabels.append(text)
+
+                if self.PPG.isChecked() == True:
+                    self.ax3PPG = self.subPlot  # PPG
+                    self.LinePPG, = self.ax3PPG.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormPPG()),
+                                                     color="purple")
+                    self.ax3PPG.tick_params(axis='y', labelcolor='purple')
+                    self.LinePPG.set_label('PPG')
+                    self.LINES.append(self.LinePPG)
+                    self.AXISET.append(self.ax3PPG)
+                    text = "PPG"
+                    self.Channellabels.append(text)
+
+                if self.RSP.isChecked() == True:
+                    self.ax4RSP = self.subPlot  # RSP
+                    self.LineRSP, = self.ax4RSP.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormRSP()),
+                                                     color="orange")
+                    self.ax4RSP.tick_params(axis='y', labelcolor='orange')
+                    self.LineRSP.set_label('RSP')
+                    self.LINES.append(self.LineRSP)
+                    self.AXISET.append(self.ax4RSP)
+                    text = "RSP"
+                    self.Channellabels.append(text)
+
+                if self.LINES != [] and self.Channellabels != []:
+                    plt.legend(self.LINES, self.Channellabels)
+
+                for ax in self.AXISET:
+                    annot = self.subPlot.annotate("", xy=(0, 0), xytext=(0, 0), textcoords="offset points",
+                                                  bbox=dict(boxstyle="round", fc="w", alpha=0.4),
+                                                  arrowprops=dict(arrowstyle="->"))
+                    annot.set_visible(False)
+
+                    self.ANNOTS.append(annot)
+
+                self.ANNOTS_DIC = dict(zip(self.AXISET, self.ANNOTS))
+
+                self.LINE_DIC = dict(zip(self.AXISET, self.LINES))
+
+                self.refresh()
+
+
+        else:
+            self.EDA.setEnabled(False)
+            self.ECG.setEnabled(False)
+            self.PPG.setEnabled(False)
+            self.RSP.setEnabled(False)
+
+
+    def update_annot(self,line, annot, ind,label):
+        x, y = line.get_data()
+
+        if(label=="EDA"):
+            yvalue  =  self.mapData(-1,2,min(self.CurrentDataSet.getNormEDA()),max(self.CurrentDataSet.getNormEDA()),y[ind["ind"][0]])
+
+        if (label == "ECG"):
+            yvalue = self.mapData(-1, 2, min(self.CurrentDataSet.getNormECG()), max(self.CurrentDataSet.getNormECG()),
+                                  y[ind["ind"][0]])
+
+        annot.xy = (x[ind["ind"][0]],yvalue )
+        text =label+"\n"+"x = {}\ny= {}".format(x[ind["ind"][0]], y[ind["ind"][0]])
+        annot.set_text(text)
+
+
+
+    def Test(self):
+
+        self.TIME = np.sort(np.random.rand(100)) ## constant  for all datasets
+
+
+        ###Example###
+
+        eda1 = np.sort(np.random.rand(100))
+        eda2 = np.sort(np.random.rand(100))
+        ppg1 = np.sort(np.random.rand(100))
+        ppg2 = np.sort(np.random.rand(100))
+        ecg1 = np.sort(np.random.rand(100))
+        ecg2 = np.sort(np.random.rand(100))
+        rsp1 = np.sort(np.random.rand(100))
+        rsp2 = np.sort(np.random.rand(100))
+
+        dataset1 = DataSet(self.TIME,eda1, ecg1, rsp1, ppg1, self.DataSet1)
+
+        dataset2 = DataSet(self.TIME,eda2, ecg2, rsp2, ppg2, self.DataSet2)
+
+        self.dataSetArray = [dataset1, dataset2]
+
+
+
+
+    def Events(self):
+
+        self.PPG.stateChanged.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
+        self.ECG.stateChanged.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
+        self.RSP.stateChanged.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
+        self.EDA.stateChanged.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
+
+        self.DataSet1.toggled.connect(lambda: self.dataSetAction(self.dataSetArray[0]))
+        self.DataSet2.toggled.connect(lambda: self.dataSetAction(self.dataSetArray[1]))
+
+        self.Line_Graphs_Normalized.toggled.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
+        self.Line_Graphs_Overlayed.toggled.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
+
+        self.actionAdd_Data.triggered.connect(self.file_open)
+
+
+    def dataSetAction(self,dataSet):
+
+        self.CurrentDataSet = dataSet
+
+        self.Line_Graphs_Normalized.setEnabled(True)
+        self.Line_Graphs_Overlayed.setEnabled(True)
+
+
+    def InitLinePlotData(self):
+
+        self.EDA.setEnabled(True)
+        self.ECG.setEnabled(True)
+        self.PPG.setEnabled(True)
+        self.RSP.setEnabled(True)
+
+
+        self.ANNOTS.clear()
+        self.LINE_DIC.clear()
+        self.ANNOTS_DIC.clear()
+        self.AXISET.clear()
+        self.LINES.clear()
+        self.Channellabels = []
+
+
+
+    def setMainDataSet(self,dataSet):
+
+        self.INUSEDATASET=dataSet
+
+        self.RenderPlots(dataSet)
+
+
+    def file_open(self):
+
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow, "Open File")
+
+        self.read_data(filename)
+
+    def read_data(self, filename):
+
+        eda = []
+        ecg = []
+        rsp = []
+        ppg = []
+
+        time = []
+
+        wb = xlrd.open_workbook(filename)
+        sheet = wb.sheet_by_index(0)
+
+        for i in range(sheet.ncols):
+            for j in range(sheet.nrows):
+
+                if i == 0:
+                    time.append(sheet.cell_value(j, i))
+
+                if i == 1:
+                    ppg.append(sheet.cell_value(j, i))
+
+                if i == 2:
+                    rsp.append(sheet.cell_value(j, i))
+
+                if i == 3:
+                    eda.append(sheet.cell_value(j, i))
+
+                if i == 4:
+                    ecg.append(sheet.cell_value(j, i))
+
+        self.createButton(eda, ecg, rsp, ppg, time)
+
+    def createButton(self, eda, ecg, rsp, ppg, time):
+
+        _translate = QtCore.QCoreApplication.translate
+        name = "DataSet" + str(self.numDataSet + 1)
+        self.numDataSet = self.numDataSet + 1;
+
+        radiobutton = QtWidgets.QRadioButton(self.left_left_scrollarea_widget)
+        radiobutton.setObjectName(name)
+        radiobutton.setText(_translate("MainWindow", name))
+        self.verticalLayout_3.addWidget(radiobutton)
+
+        self.verticalLayout_3.addWidget(self.LineBreakerDataSet, 0, QtCore.Qt.AlignBottom)
+
+        dataset = DataSet(time, eda, ecg, rsp, ppg, radiobutton)
+        radiobutton.toggled.connect(lambda: self.dataSetAction(dataset))
+
+        self.RadioButtonsArray.append(radiobutton)
+        self.dataSetArray.append(dataset)
+
+    def mapData(self,output_start,output_end,input_start,input_end,input):
+
+        output = output_start + ((output_end - output_start) / (input_end - input_start)) * (input - input_start)
+
+        return output
+
+
+
+
+# output = output_start + ((output_end - output_start) / (input_end - input_start)) * (input - input_start)
 
 
 
