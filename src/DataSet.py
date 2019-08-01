@@ -6,22 +6,26 @@ Respresents a data set for particular participant
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+import numpy as np
+
 
 class DataSet():
 
     def __init__(self,Time,EDAdata,ECGdata,RSPdata,PPGdata,RadioButton):
 
-        self.EDAdata=self.convert_EDA(EDAdata)
-        self.ECGdata= self.convert_ECG(ECGdata)
+        self.EDAdata=EDAdata
+        self.ECGdata=ECGdata
         self.RSPdata=RSPdata
         self.PPGdata=PPGdata
         self.RadioButton=RadioButton
-
         self.Time = Time
 
         self.Min = None
-
         self.Max = None
+
+        self.TotalArray = np.concatenate(((self.EDAdata),self.RSPdata,self.PPGdata,(self.ECGdata)))
+
+        self.MEAN = np.mean(self.TotalArray)
 
         self.NormEDA = []
         self.NormECG = []
@@ -32,17 +36,24 @@ class DataSet():
 
         self.Max = self.getMax()
 
-        self.NormEDA = self.getNorm(self.EDAdata)
-        self.NormECG = self.getNorm(self.ECGdata)
+        self.NormEDA = self.getNorm((self.EDAdata))
+        self.NormECG = self.getNorm((self.ECGdata))
         self.NormPPG = self.getNorm(self.PPGdata)
         self.NormRSP = self.getNorm(self.RSPdata)
 
+        self.TotalNormArray = np.concatenate((self.NormEDA,self.NormECG,self.NormPPG,self.NormRSP))
 
     def getMax(self):
-        return max(max(self.EDAdata),max(self.ECGdata),max(self.PPGdata),max(self.RSPdata))
+        return max(self.TotalArray)
 
     def getMin(self):
-        return min(min(self.EDAdata), min(self.ECGdata), min(self.PPGdata), min(self.RSPdata))
+        return min(self.TotalArray)
+
+    def getNormMax(self):
+        return max(self.TotalNormArray)
+
+    def getNormMin(self):
+        return min(self.TotalNormArray)
 
 
     def getNorm(self,data):
@@ -114,6 +125,11 @@ class DataSet():
     def setNormPPG(self,normppg):
         self.NormPPG=normppg
 
+    def getNormRSP(self):
+        return self.NormRSP
+
+    def setNormRSP(self,rsp):
+        self.NormRSP=rsp
 
 
 

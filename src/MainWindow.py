@@ -87,9 +87,6 @@ class Ui_MainWindow(object):
         self.Line_Graphs_Overlayed = QtWidgets.QRadioButton(self.scrollAreaWidgetContents)
         self.Line_Graphs_Overlayed.setObjectName("Line_Graphs_Overlayed")
         self.verticalLayout.addWidget(self.Line_Graphs_Overlayed)
-        self.Line_Graphs_Normalized =QtWidgets.QRadioButton(self.scrollAreaWidgetContents)
-        self.Line_Graphs_Normalized.setObjectName("Line_Graphs_Normalized")
-        self.verticalLayout.addWidget(self.Line_Graphs_Normalized)
         self.LineBreakerTransform = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.LineBreakerTransform.setText("")
         self.LineBreakerTransform.setObjectName("LineBreakerTransform")
@@ -259,7 +256,6 @@ class Ui_MainWindow(object):
         self.DataSet2.setText(_translate("MainWindow", "DataSet2"))
         self.TransformLabel.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Transform</span></p></body></html>"))
         self.Line_Graphs_Overlayed.setText(_translate("MainWindow", "Line Graphs(overlayed)"))
-        self.Line_Graphs_Normalized.setText(_translate("MainWindow", "Line Graphs(Normalized)"))
         self.ChannelLabel.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Channels</span></p></body></html>"))
         self.EDA.setText(_translate("MainWindow", "EDA"))
         self.ECG.setText(_translate("MainWindow", "ECG"))
@@ -300,7 +296,7 @@ class Ui_MainWindow(object):
         self.PPG.setEnabled(False)
         self.RSP.setEnabled(False)
 
-        self.Line_Graphs_Normalized.setEnabled(False)
+
         self.Line_Graphs_Overlayed.setEnabled(False)
 
     def setUpVariables(self):
@@ -324,7 +320,7 @@ class Ui_MainWindow(object):
 
 
         #### Initialising the plot area ####
-        self.fig = plt.figure(figsize=(50, 50))
+        self.fig = plt.figure(figsize=(10, 10))
         self.FirgureCanvas = FigureCanvas(self.fig)
         ## Intialise Navigation toolbar
         self.NavtoolWidget = QWidget()
@@ -338,6 +334,14 @@ class Ui_MainWindow(object):
         self.ax4RSP = None
 
         self.subPlot = plt.subplot(1, 1, 1)
+
+        self.MainChannel= None
+
+        self.MainChannelMin = 0
+
+        self.MainChannelMax = 0
+
+        self.numActiveChannels = 0
 
 
     def hover(self,event):
@@ -378,88 +382,438 @@ class Ui_MainWindow(object):
 
     def renderLineGraphs(self,dataSet):
 
+
+
         self.HOVER = False
         plt.clf()
 
-        self.subPlot = plt.subplot(1, 1, 1)
+        self.subPlot = plt.subplot(1,1,1)
 
-
-
+        self.fig.subplots_adjust(right=0.75)
 
         if dataSet != None:
 
+
+
             plt.title('Physiological data', fontsize=10)
             plt.xlabel('Time in microsecond', fontsize=10)
-            plt.ylabel('Magnitude', fontsize=10)
+           ## plt.ylabel('Magnitude', fontsize=10)
 
 
             self.InitLinePlotData()
 
             if self.Line_Graphs_Overlayed.isChecked()==True:
 
+
                 self.HOVER=True
 
-
                 if self.EDA.isChecked() == True:
-                    self.ax1EDA = self.subPlot.twinx()
 
-                    self.LineEDA, = self.ax1EDA.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormEDA()),
-                                                     color='blue')
+                    if self.MainChannel == None:
 
-                    self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
+                        self.MainChannel = "EDA"
+                        self.ax1EDA = self.subPlot
+                        self.LineEDA, = self.subPlot.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormEDA()),
+                                                          "b-", label="EDA")
 
-                    self.LineEDA.set_label('EDA')
-                    self.LINES.append(self.LineEDA)
-                    self.AXISET.append(self.ax1EDA)
-                    text = "EDA"
-                    self.Channellabels.append(text)
+                        self.subPlot.set_ylabel("EDA")
+                        self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
+                        self.LineEDA.set_label('EDA')
+                        self.LINES.append(self.LineEDA)
+                        self.AXISET.append(self.ax1EDA)
+                        text = "EDA"
+                        self.MainChannelMin = min(dataSet.getNormEDA())
+                        self.MainChannelMax =  max(dataSet.getNormEDA())
+                        self.Channellabels.append(text)
+                        self.numActiveChannels=self.numActiveChannels+1;
+                        #par1.yaxis.label.set_color(p2.get_color())
+                        self.ax1EDA.yaxis.label.set_color(self.LineEDA.get_color())
+                        tkw = dict(size=4, width=1.5)
+                        self.ax1EDA.tick_params(axis='y', colors=self.LineEDA.get_color(), **tkw)
+
+                    else:
+
+                        self.ax1EDA = self.subPlot.twinx()
+
+                        self.numActiveChannels = self.numActiveChannels + 1;
+
+
+                        if(self.numActiveChannels==2):
+
+                            self.LineEDA, = self.ax1EDA.plot(np.array(dataSet.getTime()),
+                                                             np.array(dataSet.getNormEDA()),
+                                                             "b-", label="EDA")
+                            self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
+
+                            self.LineEDA.set_label('EDA')
+                            self.LINES.append(self.LineEDA)
+                            self.AXISET.append(self.ax1EDA)
+                            text = "EDA"
+                            self.Channellabels.append(text)
+
+                            self.ax1EDA.set_ylabel("EDA")
+
+                            self.ax1EDA.yaxis.label.set_color(self.LineEDA.get_color())
+                            tkw = dict(size=4, width=1.5)
+                            self.ax1EDA.tick_params(axis='y', colors=self.LineEDA.get_color(), **tkw)
+
+                        elif self.numActiveChannels == 3:
+
+                            self.ax1EDA.spines["right"].set_position(("axes",1.2))
+
+                            self.make_patch_spines_invisible(self.ax1EDA)
+
+                            self.ax1EDA.spines["right"].set_visible(True)
+
+                            self.LineEDA, = self.ax1EDA.plot(np.array(dataSet.getTime()),
+                                                             np.array(dataSet.getNormEDA()),
+                                                             "b-", label="EDA")
+                            self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
+
+                            self.LineEDA.set_label('EDA')
+                            self.LINES.append(self.LineEDA)
+                            self.AXISET.append(self.ax1EDA)
+                            text = "EDA"
+                            self.Channellabels.append(text)
+
+                            self.ax1EDA.set_ylabel("EDA")
+
+                            self.ax1EDA.yaxis.label.set_color(self.LineEDA.get_color())
+                            tkw = dict(size=4, width=1.5)
+                            self.ax1EDA.tick_params(axis='y', colors=self.LineEDA.get_color(), **tkw)
+
+                        elif self.numActiveChannels == 4:
+
+                            self.ax1EDA.spines["right"].set_position(("axes", 1.5))
+
+                            self.make_patch_spines_invisible(self.ax1EDA)
+
+                            self.ax1EDA.spines["right"].set_visible(True)
+
+                            self.LineEDA, = self.ax1EDA.plot(np.array(dataSet.getTime()),
+                                                             np.array(dataSet.getNormEDA()),
+                                                             "b-", label="EDA")
+                            self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
+
+                            self.LineEDA.set_label('EDA')
+                            self.LINES.append(self.LineEDA)
+                            self.AXISET.append(self.ax1EDA)
+                            text = "EDA"
+                            self.Channellabels.append(text)
+
+                            self.ax1EDA.set_ylabel("EDA")
+
+                            self.ax1EDA.yaxis.label.set_color(self.LineEDA.get_color())
+                            tkw = dict(size=4, width=1.5)
+                            self.ax1EDA.tick_params(axis='y', colors=self.LineEDA.get_color(), **tkw)
+
 
 
                 if self.ECG.isChecked() == True:
-                    self.ax2ECG = self.subPlot.twinx()# ECG
-                    self.LineECG, = self.ax2ECG.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormECG()),
+
+                    if self.MainChannel == None:
+
+                        self.MainChannel = "ECG"
+                        self.ax2ECG = self.subPlot
+                        self.LineECG, = self.subPlot.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormECG()),
                                                      color="red")
 
-                    self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+                        self.subPlot.set_ylabel("ECG")
+                        self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+                        self.LineECG.set_label('ECG')
+                        self.LINES.append(self.LineECG)
+                        self.AXISET.append(self.ax2ECG)
+                        text = "ECG"
+                        self.MainChannelMin = min(dataSet.getNormECG())
+                        self.MainChannelMax = max(dataSet.getNormECG())
+                        self.Channellabels.append(text)
+                        self.numActiveChannels = self.numActiveChannels + 1;
 
-                    self.LineECG.set_label('ECG')
-                   # self.ax2ECG.tick_params(axis='y', labelcolor='red')
-                    self.LINES.append(self.LineECG)
-                    self.AXISET.append(self.ax2ECG)
-                    text = "ECG"
-                    self.Channellabels.append(text)
+                        self.ax2ECG.yaxis.label.set_color(self.LineECG.get_color())
+                        tkw = dict(size=4, width=1.5)
+                        self.ax2ECG.tick_params(axis='y', colors=self.LineECG.get_color(), **tkw)
+
+                    else:
+
+                        self.ax2ECG = self.subPlot.twinx()
+
+                        self.numActiveChannels = self.numActiveChannels + 1;
+
+                        if (self.numActiveChannels == 2):
+
+                            self.LineECG, = self.ax2ECG.plot(np.array(dataSet.getTime()),
+                                                             np.array(dataSet.getNormECG()),
+                                                             color ="red", label="ECG")
+
+                            self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+                            self.LineECG.set_label('ECG')
+                            self.LINES.append(self.LineECG)
+                            self.AXISET.append(self.ax2ECG)
+                            text = "ECG"
+                            self.Channellabels.append(text)
+
+                            self.ax2ECG.set_ylabel("ECG")
+
+                            self.ax2ECG.yaxis.label.set_color(self.LineECG.get_color())
+                            tkw = dict(size=4, width=1.5)
+                            self.ax2ECG.tick_params(axis='y', colors=self.LineECG.get_color(), **tkw)
+
+                        elif self.numActiveChannels == 3:
+
+                            self.ax2ECG.spines["right"].set_position(("axes", 1.2))
+
+                            self.make_patch_spines_invisible(self.ax2ECG)
+
+                            self.ax2ECG.spines["right"].set_visible(True)
+
+                            self.LineECG, = self.ax2ECG.plot(np.array(dataSet.getTime()),
+                                                             np.array(dataSet.getNormECG()),
+                                                             color = "red", label="ECG")
+
+                            self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+                            self.LineECG.set_label('ECG')
+                            self.LINES.append(self.LineECG)
+                            self.AXISET.append(self.ax2ECG)
+                            text = "ECG"
+                            self.Channellabels.append(text)
+
+                            self.ax2ECG.set_ylabel("ECG")
+
+                            self.ax2ECG.yaxis.label.set_color(self.LineECG.get_color())
+                            tkw = dict(size=4, width=1.5)
+                            self.ax2ECG.tick_params(axis='y', colors=self.LineECG.get_color(), **tkw)
+
+                        elif self.numActiveChannels == 4:
+
+                            self.ax2ECG.spines["right"].set_position(("axes", 1.5))
+
+                            self.make_patch_spines_invisible(self.ax2ECG)
+
+                            self.ax2ECG.spines["right"].set_visible(True)
+
+                            self.LineECG, = self.ax2ECG.plot(np.array(dataSet.getTime()),
+                                                             np.array(dataSet.getNormECG()),
+                                                             color="red", label="ECG")
+
+                            self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+                            self.LineECG.set_label('ECG')
+                            self.LINES.append(self.LineECG)
+                            self.AXISET.append(self.ax2ECG)
+                            text = "ECG"
+                            self.Channellabels.append(text)
+
+                            self.ax2ECG.set_ylabel("ECG")
+
+                            self.ax2ECG.yaxis.label.set_color(self.LineECG.get_color())
+                            tkw = dict(size=4, width=1.5)
+                            self.ax2ECG.tick_params(axis='y', colors=self.LineECG.get_color(), **tkw)
+
 
                 if self.PPG.isChecked() == True:
 
-                    self.ax3PPG = self.subPlot.twinx().twiny() # PPG
+                    if self.MainChannel == None:
 
-                    self.LinePPG, = self.ax3PPG.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormPPG()),
-                                                     color="purple")
+                        self.MainChannel = "PPG"
+                        self.ax3PPG = self.subPlot
+                        self.LinePPG, = self.subPlot.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormPPG()),
+                                                          color="purple")
 
-                    self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
+                        self.subPlot.set_ylabel("PPG")
+                        self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
+                        self.LinePPG.set_label('PPG')
+                        self.LINES.append(self.LinePPG)
+                        self.AXISET.append(self.ax3PPG)
+                        text = "PPG"
+                        self.MainChannelMin = min(dataSet.getNormPPG())
+                        self.MainChannelMax = max(dataSet.getNormPPG())
+                        self.Channellabels.append(text)
+                        self.numActiveChannels = self.numActiveChannels + 1;
 
-                    self.LinePPG.set_label('PPG')
-                    #self.ax3PPG.tick_params(axis='y', labelcolor='purple')
-                    self.LINES.append(self.LinePPG)
-                    self.AXISET.append(self.ax3PPG)
-                    text = "PPG"
-                    self.Channellabels.append(text)
+                        self.ax3PPG.yaxis.label.set_color(self.LinePPG.get_color())
+                        tkw = dict(size=4, width=1.5)
+                        self.ax3PPG.tick_params(axis='y', colors=self.LinePPG.get_color(), **tkw)
 
+                    else:
+
+                        self.ax3PPG = self.subPlot.twinx()
+
+                        self.numActiveChannels = self.numActiveChannels + 1;
+
+                        if (self.numActiveChannels == 2):
+
+                            self.LinePPG, = self.ax3PPG.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormPPG()),
+                                                          color="purple")
+
+
+                            self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
+                            self.LinePPG.set_label('PPG')
+                            self.LINES.append(self.LinePPG)
+                            self.AXISET.append(self.ax3PPG)
+                            text = "PPG"
+
+                            self.ax3PPG.set_ylabel("PPG")
+
+                            self.Channellabels.append(text)
+
+                            self.ax3PPG.yaxis.label.set_color(self.LinePPG.get_color())
+                            tkw = dict(size=4, width=1.5)
+                            self.ax3PPG.tick_params(axis='y', colors=self.LinePPG.get_color(), **tkw)
+
+                        elif self.numActiveChannels == 3:
+
+                            self.ax3PPG.spines["right"].set_position(("axes", 1.2))
+
+                            self.make_patch_spines_invisible(self.ax3PPG)
+
+                            self.ax3PPG.spines["right"].set_visible(True)
+
+                            self.LinePPG, = self.ax3PPG.plot(np.array(dataSet.getTime()),
+                                                             np.array(dataSet.getNormPPG()),
+                                                             color="purple")
+
+                            self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
+                            self.LinePPG.set_label('PPG')
+                            self.LINES.append(self.LinePPG)
+                            self.AXISET.append(self.ax3PPG)
+                            text = "PPG"
+                            self.Channellabels.append(text)
+
+                            self.ax3PPG.set_ylabel("PPG")
+
+                            self.ax3PPG.yaxis.label.set_color(self.LinePPG.get_color())
+                            tkw = dict(size=4, width=1.5)
+                            self.ax3PPG.tick_params(axis='y', colors=self.LinePPG.get_color(), **tkw)
+
+                        elif self.numActiveChannels == 4:
+
+                            self.ax3PPG.spines["right"].set_position(("axes", 1.5))
+
+                            self.make_patch_spines_invisible(self.ax3PPG)
+
+                            self.ax3PPG.spines["right"].set_visible(True)
+
+                            self.LinePPG, = self.ax3PPG.plot(np.array(dataSet.getTime()),
+                                                             np.array(dataSet.getNormPPG()),
+                                                             color="purple")
+
+                            self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
+                            self.LinePPG.set_label('PPG')
+                            self.LINES.append(self.LinePPG)
+                            self.AXISET.append(self.ax3PPG)
+                            text = "PPG"
+                            self.Channellabels.append(text)
+
+                            self.ax3PPG.set_ylabel("PPG")
+
+                            self.ax3PPG.yaxis.label.set_color(self.LinePPG.get_color())
+                            tkw = dict(size=4, width=1.5)
+                            self.ax3PPG.tick_params(axis='y', colors=self.LinePPG.get_color(), **tkw)
 
                 if self.RSP.isChecked() == True:
-                    self.ax4RSP = self.subPlot.twinx() # RSP
 
-                    self.LineRSP, = self.ax4RSP.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormRSP()),
-                                                     color="orange")
+                    if self.MainChannel == None:
 
-                    self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
+                        self.MainChannel = "RSP"
+                        self.ax4RSP = self.subPlot
+                        self.LineRSP, = self.subPlot.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormRSP()),
+                                                          color="orange")
 
-                    self.LineRSP.set_label('RSP')
-                   # self.ax4RSP.tick_params(axis='y', labelcolor='orange')
-                    self.LINES.append(self.LineRSP)
-                    self.AXISET.append(self.ax4RSP)
-                    text = "RSP"
-                    self.Channellabels.append(text)
+                        self.subPlot.set_ylabel("RSP")
+                        self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
+                        self.LineRSP.set_label('RSP')
+                        self.LINES.append(self.LineRSP)
+                        self.AXISET.append(self.ax4RSP)
+                        text = "RSP"
+                        self.MainChannelMin = min(dataSet.getNormRSP())
+                        self.MainChannelMax = max(dataSet.getNormRSP())
+                        self.Channellabels.append(text)
+                        self.numActiveChannels = self.numActiveChannels + 1;
+
+                        self.ax4RSP.yaxis.label.set_color(self.LineRSP.get_color())
+                        tkw = dict(size=4, width=1.5)
+                        self.ax4RSP.tick_params(axis='y', colors=self.LineRSP.get_color(), **tkw)
+
+                    else:
+
+                        self.ax4RSP = self.subPlot.twinx()
+
+                        self.numActiveChannels = self.numActiveChannels + 1;
+
+                        if (self.numActiveChannels == 2):
+
+                            self.LineRSP, = self.ax4RSP.plot(np.array(dataSet.getTime()),
+                                                              np.array(dataSet.getNormRSP()),
+                                                              color="orange")
+
+                            self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
+                            self.LineRSP.set_label('RSP')
+                            self.LINES.append(self.LineRSP)
+                            self.AXISET.append(self.ax4RSP)
+                            text = "RSP"
+
+                            self.ax4RSP.set_ylabel("RSP")
+
+                            self.Channellabels.append(text)
+
+                            self.ax4RSP.yaxis.label.set_color(self.LineRSP.get_color())
+                            tkw = dict(size=4, width=1.5)
+                            self.ax4RSP.tick_params(axis='y', colors=self.LineRSP.get_color(), **tkw)
+
+                        elif self.numActiveChannels == 3:
+
+                            self.ax4RSP.spines["right"].set_position(("axes", 1.2))
+
+                            self.make_patch_spines_invisible(self.ax4RSP)
+
+                            self.ax4RSP.spines["right"].set_visible(True)
+
+                            self.LineRSP, = self.ax4RSP.plot(np.array(dataSet.getTime()),
+                                                             np.array(dataSet.getNormRSP()),
+                                                             color="orange")
+
+                            self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
+                            self.LineRSP.set_label('RSP')
+                            self.LINES.append(self.LineRSP)
+                            self.AXISET.append(self.ax4RSP)
+                            text = "RSP"
+
+                            self.ax4RSP.set_ylabel("RSP")
+
+                            self.Channellabels.append(text)
+
+                            self.ax4RSP.yaxis.label.set_color(self.LineRSP.get_color())
+                            tkw = dict(size=4, width=1.5)
+                            self.ax4RSP.tick_params(axis='y', colors=self.LineRSP.get_color(), **tkw)
+
+
+
+                        elif self.numActiveChannels == 4:
+
+
+                            self.ax4RSP.spines["right"].set_position(("axes", 1.5))
+
+                            self.make_patch_spines_invisible(self.ax4RSP)
+
+                            self.ax4RSP.spines["right"].set_visible(True)
+
+                            self.LineRSP, = self.ax4RSP.plot(np.array(dataSet.getTime()),
+                                                             np.array(dataSet.getNormRSP()),
+                                                             color="orange")
+
+                            self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
+                            self.LineRSP.set_label('RSP')
+                            self.LINES.append(self.LineRSP)
+                            self.AXISET.append(self.ax4RSP)
+                            text = "RSP"
+
+                            self.ax4RSP.set_ylabel("RSP")
+
+                            self.Channellabels.append(text)
+
+                            self.ax4RSP.yaxis.label.set_color(self.LineRSP.get_color())
+                            tkw = dict(size=4, width=1.5)
+                            self.ax4RSP.tick_params(axis='y', colors=self.LineRSP.get_color(), **tkw)
+
 
                 if self.LINES != [] and self.Channellabels != []:
                     plt.legend(self.LINES, self.Channellabels)
@@ -476,84 +830,15 @@ class Ui_MainWindow(object):
 
                 self.LINE_DIC = dict(zip(self.AXISET, self.LINES))
 
-                ##plt.yticks(np.arange(dataSet.getMin(),dataSet.getMax(),0.1))
 
-                #output = output_start + ((output_end - output_start) / (input_end - input_start)) * (input - input_start)
+                if self.MainChannel!= None:
 
+                     self.subPlot.set_ylim(self.MainChannelMin, self.MainChannelMax)
 
-                self.subPlot.set_ylim(-1,dataSet.getNormMax()+1)
-
-
+                plt.tight_layout()
                 self.refresh()
 
 
-            elif self.Line_Graphs_Normalized.isChecked() == True:
-
-                plt.title('Channel(s) vs Time', fontsize=10)
-                plt.xlabel('Time', fontsize=10)
-                plt.ylabel('Volts', fontsize=10)
-
-                self.HOVER=True
-
-                if self.EDA.isChecked() == True:
-                    self.ax1EDA = self.subPlot  # EDA
-                    self.LineEDA, = self.ax1EDA.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormEDA()),
-                                                     color='blue')
-                    self.LineEDA.set_label('EDA')
-                    self.LINES.append(self.LineEDA)
-                    self.AXISET.append(self.ax1EDA)
-                    text = "EDA"
-                    self.Channellabels.append(text)
-
-                if self.ECG.isChecked() == True:
-                    self.ax2ECG = self.subPlot  # ECG
-                    self.LineECG, = self.ax2ECG.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormECG()),
-                                                     color="red")
-                    self.ax2ECG.tick_params(axis='y', labelcolor='red')
-                    self.LineECG.set_label('ECG')
-                    self.LINES.append(self.LineECG)
-                    self.AXISET.append(self.ax2ECG)
-                    text = "ECG"
-                    self.Channellabels.append(text)
-
-                if self.PPG.isChecked() == True:
-                    self.ax3PPG = self.subPlot  # PPG
-                    self.LinePPG, = self.ax3PPG.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormPPG()),
-                                                     color="purple")
-                    self.ax3PPG.tick_params(axis='y', labelcolor='purple')
-                    self.LinePPG.set_label('PPG')
-                    self.LINES.append(self.LinePPG)
-                    self.AXISET.append(self.ax3PPG)
-                    text = "PPG"
-                    self.Channellabels.append(text)
-
-                if self.RSP.isChecked() == True:
-                    self.ax4RSP = self.subPlot  # RSP
-                    self.LineRSP, = self.ax4RSP.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormRSP()),
-                                                     color="orange")
-                    self.ax4RSP.tick_params(axis='y', labelcolor='orange')
-                    self.LineRSP.set_label('RSP')
-                    self.LINES.append(self.LineRSP)
-                    self.AXISET.append(self.ax4RSP)
-                    text = "RSP"
-                    self.Channellabels.append(text)
-
-                if self.LINES != [] and self.Channellabels != []:
-                    plt.legend(self.LINES, self.Channellabels)
-
-                for ax in self.AXISET:
-                    annot = self.subPlot.annotate("", xy=(0, 0), xytext=(0, 0), textcoords="offset points",
-                                                  bbox=dict(boxstyle="round", fc="w", alpha=0.4),
-                                                  arrowprops=dict(arrowstyle="->"))
-                    annot.set_visible(False)
-
-                    self.ANNOTS.append(annot)
-
-                self.ANNOTS_DIC = dict(zip(self.AXISET, self.ANNOTS))
-
-                self.LINE_DIC = dict(zip(self.AXISET, self.LINES))
-
-                self.refresh()
 
 
         else:
@@ -563,15 +848,27 @@ class Ui_MainWindow(object):
             self.RSP.setEnabled(False)
 
 
+
+
     def update_annot(self,line, annot, ind,label):
         x, y = line.get_data()
 
         if(label=="EDA"):
-            yvalue  =  self.mapData(-1,2,min(self.CurrentDataSet.getNormEDA()),max(self.CurrentDataSet.getNormEDA()),y[ind["ind"][0]])
+            yvalue  =  self.mapData(self.MainChannelMin,self.MainChannelMax,min(self.CurrentDataSet.getNormEDA()),max(self.CurrentDataSet.getNormEDA()),y[ind["ind"][0]])
 
         if (label == "ECG"):
-            yvalue = self.mapData(-1, 2, min(self.CurrentDataSet.getNormECG()), max(self.CurrentDataSet.getNormECG()),
+            yvalue = self.mapData(self.MainChannelMin,self.MainChannelMax, min(self.CurrentDataSet.getNormECG()), max(self.CurrentDataSet.getNormECG()),
                                   y[ind["ind"][0]])
+
+        if (label == "PPG"):
+            yvalue = self.mapData(self.MainChannelMin,self.MainChannelMax, min(self.CurrentDataSet.getNormPPG()), max(self.CurrentDataSet.getPPGdata()),
+                                  y[ind["ind"][0]])
+
+        if (label == "RSP"):
+            yvalue = self.mapData(self.MainChannelMin,self.MainChannelMax, min(self.CurrentDataSet.getNormRSP()), max(self.CurrentDataSet.getNormRSP()),
+                                  y[ind["ind"][0]])
+
+
 
         annot.xy = (x[ind["ind"][0]],yvalue )
         text =label+"\n"+"x = {}\ny= {}".format(x[ind["ind"][0]], y[ind["ind"][0]])
@@ -614,7 +911,7 @@ class Ui_MainWindow(object):
         self.DataSet1.toggled.connect(lambda: self.dataSetAction(self.dataSetArray[0]))
         self.DataSet2.toggled.connect(lambda: self.dataSetAction(self.dataSetArray[1]))
 
-        self.Line_Graphs_Normalized.toggled.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
+
         self.Line_Graphs_Overlayed.toggled.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
 
         self.actionAdd_Data.triggered.connect(self.file_open)
@@ -624,7 +921,7 @@ class Ui_MainWindow(object):
 
         self.CurrentDataSet = dataSet
 
-        self.Line_Graphs_Normalized.setEnabled(True)
+        #self.Line_Graphs_Normalized.setEnabled(True)
         self.Line_Graphs_Overlayed.setEnabled(True)
 
 
@@ -642,6 +939,12 @@ class Ui_MainWindow(object):
         self.AXISET.clear()
         self.LINES.clear()
         self.Channellabels = []
+
+        self.MainChannelMax=0
+        self.MainChannelMin=0
+        self.MainChannel= None
+        self.numActiveChannels=0
+
 
 
 
@@ -711,15 +1014,20 @@ class Ui_MainWindow(object):
 
     def mapData(self,output_start,output_end,input_start,input_end,input):
 
-        output = output_start + ((output_end - output_start) / (input_end - input_start)) * (input - input_start)
 
-        return output
+        if (input_end - input_start) == 0:
 
+            return 0.0
 
+        else:
 
+            return output_start + ((output_end - output_start) / (input_end - input_start)) * (input - input_start)
 
-# output = output_start + ((output_end - output_start) / (input_end - input_start)) * (input - input_start)
-
+    def make_patch_spines_invisible(self,ax):
+        ax.set_frame_on(True)
+        ax.patch.set_visible(False)
+        for sp in ax.spines.values():
+            sp.set_visible(False)
 
 
 if __name__ == "__main__":
