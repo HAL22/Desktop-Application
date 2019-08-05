@@ -18,7 +18,11 @@ import matplotlib.pyplot as plt
 import numpy as np; np.random.seed(1)
 import xlrd
 
+import pandas as pd
+from pandas import ExcelWriter
+from pandas import ExcelFile
 
+import seaborn as sns
 
 
 class Ui_MainWindow(object):
@@ -33,6 +37,7 @@ class Ui_MainWindow(object):
         self.centralhorizontallayout.setObjectName("centralhorizontallayout")
         self.left_widget = QtWidgets.QWidget(self.centralwidget)
         self.left_widget.setObjectName("left_widget")
+        self.left_widget.setMaximumWidth(300)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout(self.left_widget)
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
         self.left_main_horizontallayout = QtWidgets.QHBoxLayout()
@@ -87,6 +92,12 @@ class Ui_MainWindow(object):
         self.Line_Graphs_Overlayed = QtWidgets.QRadioButton(self.scrollAreaWidgetContents)
         self.Line_Graphs_Overlayed.setObjectName("Line_Graphs_Overlayed")
         self.verticalLayout.addWidget(self.Line_Graphs_Overlayed)
+        self.CorrelationMatrix = QtWidgets.QRadioButton(self.scrollAreaWidgetContents)
+        self.CorrelationMatrix.setObjectName("Correlation Matrix")
+        self.verticalLayout.addWidget(self.CorrelationMatrix)
+        self.ActivateTriggers = QtWidgets.QCheckBox(self.scrollAreaWidgetContents)
+        self.ActivateTriggers.setObjectName("Activate Triggers")
+        self.verticalLayout.addWidget(self.ActivateTriggers)
         self.LineBreakerTransform = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.LineBreakerTransform.setText("")
         self.LineBreakerTransform.setObjectName("LineBreakerTransform")
@@ -117,6 +128,10 @@ class Ui_MainWindow(object):
         self.EDA.setChecked(True)
         self.EDA.setTristate(False)
         self.EDA.setObjectName("EDA")
+
+
+
+
         self.verticalLayout_5.addWidget(self.EDA)
         self.ECG = QtWidgets.QCheckBox(self.left_right_scrollarea_widget)
         self.ECG.setChecked(True)
@@ -256,6 +271,8 @@ class Ui_MainWindow(object):
         self.DataSet2.setText(_translate("MainWindow", "DataSet2"))
         self.TransformLabel.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Transform</span></p></body></html>"))
         self.Line_Graphs_Overlayed.setText(_translate("MainWindow", "Line Graphs(overlayed)"))
+        self.CorrelationMatrix.setText(_translate("MainWindow", "Correlation Matrix"))
+        self.ActivateTriggers.setText(_translate("MainWindow", "Activate Triggers"))
         self.ChannelLabel.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Channels</span></p></body></html>"))
         self.EDA.setText(_translate("MainWindow", "EDA"))
         self.ECG.setText(_translate("MainWindow", "ECG"))
@@ -298,6 +315,11 @@ class Ui_MainWindow(object):
 
 
         self.Line_Graphs_Overlayed.setEnabled(False)
+        self.CorrelationMatrix.setEnabled(False)
+
+        self.ActivateTriggers.setEnabled(False)
+
+
 
     def setUpVariables(self):
 
@@ -320,7 +342,7 @@ class Ui_MainWindow(object):
 
 
         #### Initialising the plot area ####
-        self.fig = plt.figure(figsize=(10, 10))
+        self.fig = plt.figure(figsize=(30, 20))
         self.FirgureCanvas = FigureCanvas(self.fig)
         ## Intialise Navigation toolbar
         self.NavtoolWidget = QWidget()
@@ -337,11 +359,13 @@ class Ui_MainWindow(object):
 
         self.MainChannel= None
 
-        self.MainChannelMin = 0
+        self.MainChannelMin = None
 
-        self.MainChannelMax = 0
+        self.MainChannelMax = None
 
         self.numActiveChannels = 0
+
+        self.ActiveTriggers = False
 
 
     def hover(self,event):
@@ -391,7 +415,15 @@ class Ui_MainWindow(object):
 
         self.fig.subplots_adjust(right=0.75)
 
+
         if dataSet != None:
+
+            self.EDA.setEnabled(True)
+            self.ECG.setEnabled(True)
+            self.PPG.setEnabled(True)
+            self.RSP.setEnabled(True)
+
+            self.ActivateTriggers.setEnabled(True)
 
 
 
@@ -417,7 +449,14 @@ class Ui_MainWindow(object):
                                                           "b-", label="EDA")
 
                         self.subPlot.set_ylabel("EDA")
-                        self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
+
+                        if(min(dataSet.getNormEDA()) ==0 and max(dataSet.getNormEDA()) == 0):
+                            self.ax1EDA.set_ylim(0,1)
+
+                        else:
+
+                            self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
+
                         self.LineEDA.set_label('EDA')
                         self.LINES.append(self.LineEDA)
                         self.AXISET.append(self.ax1EDA)
@@ -443,7 +482,12 @@ class Ui_MainWindow(object):
                             self.LineEDA, = self.ax1EDA.plot(np.array(dataSet.getTime()),
                                                              np.array(dataSet.getNormEDA()),
                                                              "b-", label="EDA")
-                            self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
+                            if (min(dataSet.getNormEDA()) == 0 and max(dataSet.getNormEDA()) == 0):
+                                self.ax1EDA.set_ylim(0, 1)
+
+                            else:
+
+                                self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
 
                             self.LineEDA.set_label('EDA')
                             self.LINES.append(self.LineEDA)
@@ -468,7 +512,12 @@ class Ui_MainWindow(object):
                             self.LineEDA, = self.ax1EDA.plot(np.array(dataSet.getTime()),
                                                              np.array(dataSet.getNormEDA()),
                                                              "b-", label="EDA")
-                            self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
+                            if (min(dataSet.getNormEDA()) == 0 and max(dataSet.getNormEDA()) == 0):
+                                self.ax1EDA.set_ylim(0, 1)
+
+                            else:
+
+                                self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
 
                             self.LineEDA.set_label('EDA')
                             self.LINES.append(self.LineEDA)
@@ -484,7 +533,7 @@ class Ui_MainWindow(object):
 
                         elif self.numActiveChannels == 4:
 
-                            self.ax1EDA.spines["right"].set_position(("axes", 1.5))
+                            self.ax1EDA.spines["right"].set_position(("axes", 1.3))
 
                             self.make_patch_spines_invisible(self.ax1EDA)
 
@@ -493,7 +542,12 @@ class Ui_MainWindow(object):
                             self.LineEDA, = self.ax1EDA.plot(np.array(dataSet.getTime()),
                                                              np.array(dataSet.getNormEDA()),
                                                              "b-", label="EDA")
-                            self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
+                            if (min(dataSet.getNormEDA()) == 0 and max(dataSet.getNormEDA()) == 0):
+                                self.ax1EDA.set_ylim(0, 1)
+
+                            else:
+
+                                self.ax1EDA.set_ylim(min(dataSet.getNormEDA()), max(dataSet.getNormEDA()))
 
                             self.LineEDA.set_label('EDA')
                             self.LINES.append(self.LineEDA)
@@ -519,7 +573,15 @@ class Ui_MainWindow(object):
                                                      color="red")
 
                         self.subPlot.set_ylabel("ECG")
-                        self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+
+                        if (min(dataSet.getNormECG()) == 0 and max(dataSet.getNormECG()) == 0):
+                            self.ax2ECG.set_ylim(0, 1)
+
+                        else:
+
+                            self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+
+
                         self.LineECG.set_label('ECG')
                         self.LINES.append(self.LineECG)
                         self.AXISET.append(self.ax2ECG)
@@ -545,7 +607,14 @@ class Ui_MainWindow(object):
                                                              np.array(dataSet.getNormECG()),
                                                              color ="red", label="ECG")
 
-                            self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+                            if (min(dataSet.getNormECG()) == 0 and max(dataSet.getNormECG()) == 0):
+                                self.ax2ECG.set_ylim(0, 1)
+
+                            else:
+
+                                self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+
+
                             self.LineECG.set_label('ECG')
                             self.LINES.append(self.LineECG)
                             self.AXISET.append(self.ax2ECG)
@@ -570,7 +639,14 @@ class Ui_MainWindow(object):
                                                              np.array(dataSet.getNormECG()),
                                                              color = "red", label="ECG")
 
-                            self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+                            if (min(dataSet.getNormECG()) == 0 and max(dataSet.getNormECG()) == 0):
+                                self.ax2ECG.set_ylim(0, 1)
+
+                            else:
+
+                                self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+
+
                             self.LineECG.set_label('ECG')
                             self.LINES.append(self.LineECG)
                             self.AXISET.append(self.ax2ECG)
@@ -585,7 +661,7 @@ class Ui_MainWindow(object):
 
                         elif self.numActiveChannels == 4:
 
-                            self.ax2ECG.spines["right"].set_position(("axes", 1.5))
+                            self.ax2ECG.spines["right"].set_position(("axes", 1.3))
 
                             self.make_patch_spines_invisible(self.ax2ECG)
 
@@ -595,7 +671,13 @@ class Ui_MainWindow(object):
                                                              np.array(dataSet.getNormECG()),
                                                              color="red", label="ECG")
 
-                            self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+                            if (min(dataSet.getNormECG()) == 0 and max(dataSet.getNormECG()) == 0):
+                                self.ax2ECG.set_ylim(0, 1)
+
+                            else:
+
+                                self.ax2ECG.set_ylim(min(dataSet.getNormECG()), max(dataSet.getNormECG()))
+
                             self.LineECG.set_label('ECG')
                             self.LINES.append(self.LineECG)
                             self.AXISET.append(self.ax2ECG)
@@ -619,7 +701,12 @@ class Ui_MainWindow(object):
                                                           color="purple")
 
                         self.subPlot.set_ylabel("PPG")
-                        self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
+                        if (min(dataSet.getNormPPG()) == 0 and max(dataSet.getNormPPG()) == 0):
+                            self.ax3PPG.set_ylim(0, 1)
+
+                        else:
+
+                            self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
                         self.LinePPG.set_label('PPG')
                         self.LINES.append(self.LinePPG)
                         self.AXISET.append(self.ax3PPG)
@@ -644,8 +731,12 @@ class Ui_MainWindow(object):
                             self.LinePPG, = self.ax3PPG.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormPPG()),
                                                           color="purple")
 
+                            if (min(dataSet.getNormPPG()) == 0 and max(dataSet.getNormPPG()) == 0):
+                                self.ax3PPG.set_ylim(0, 1)
 
-                            self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
+                            else:
+
+                                self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
                             self.LinePPG.set_label('PPG')
                             self.LINES.append(self.LinePPG)
                             self.AXISET.append(self.ax3PPG)
@@ -671,7 +762,12 @@ class Ui_MainWindow(object):
                                                              np.array(dataSet.getNormPPG()),
                                                              color="purple")
 
-                            self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
+                            if (min(dataSet.getNormPPG()) == 0 and max(dataSet.getNormPPG()) == 0):
+                                self.ax3PPG.set_ylim(0, 1)
+
+                            else:
+
+                                self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
                             self.LinePPG.set_label('PPG')
                             self.LINES.append(self.LinePPG)
                             self.AXISET.append(self.ax3PPG)
@@ -686,7 +782,7 @@ class Ui_MainWindow(object):
 
                         elif self.numActiveChannels == 4:
 
-                            self.ax3PPG.spines["right"].set_position(("axes", 1.5))
+                            self.ax3PPG.spines["right"].set_position(("axes", 1.3))
 
                             self.make_patch_spines_invisible(self.ax3PPG)
 
@@ -696,7 +792,14 @@ class Ui_MainWindow(object):
                                                              np.array(dataSet.getNormPPG()),
                                                              color="purple")
 
-                            self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
+                            if (min(dataSet.getNormPPG()) == 0 and max(dataSet.getNormPPG()) == 0):
+                                self.ax3PPG.set_ylim(0, 1)
+
+                            else:
+
+                                self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
+
+
                             self.LinePPG.set_label('PPG')
                             self.LINES.append(self.LinePPG)
                             self.AXISET.append(self.ax3PPG)
@@ -719,7 +822,12 @@ class Ui_MainWindow(object):
                                                           color="orange")
 
                         self.subPlot.set_ylabel("RSP")
-                        self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
+                        if (min(dataSet.getNormRSP()) == 0 and max(dataSet.getNormRSP()) == 0):
+                            self.ax4RSP.set_ylim(0, 1)
+
+                        else:
+
+                            self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
                         self.LineRSP.set_label('RSP')
                         self.LINES.append(self.LineRSP)
                         self.AXISET.append(self.ax4RSP)
@@ -743,9 +851,14 @@ class Ui_MainWindow(object):
 
                             self.LineRSP, = self.ax4RSP.plot(np.array(dataSet.getTime()),
                                                               np.array(dataSet.getNormRSP()),
-                                                              color="orange")
+                                                              'go')
 
-                            self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
+                            if (min(dataSet.getNormRSP()) == 0 and max(dataSet.getNormRSP()) == 0):
+                                self.ax4RSP.set_ylim(0, 1)
+
+                            else:
+
+                                self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
                             self.LineRSP.set_label('RSP')
                             self.LINES.append(self.LineRSP)
                             self.AXISET.append(self.ax4RSP)
@@ -771,7 +884,12 @@ class Ui_MainWindow(object):
                                                              np.array(dataSet.getNormRSP()),
                                                              color="orange")
 
-                            self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
+                            if (min(dataSet.getNormRSP()) == 0 and max(dataSet.getNormRSP()) == 0):
+                                self.ax4RSP.set_ylim(0, 1)
+
+                            else:
+
+                                self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
                             self.LineRSP.set_label('RSP')
                             self.LINES.append(self.LineRSP)
                             self.AXISET.append(self.ax4RSP)
@@ -790,7 +908,7 @@ class Ui_MainWindow(object):
                         elif self.numActiveChannels == 4:
 
 
-                            self.ax4RSP.spines["right"].set_position(("axes", 1.5))
+                            self.ax4RSP.spines["right"].set_position(("axes", 1.3))
 
                             self.make_patch_spines_invisible(self.ax4RSP)
 
@@ -800,7 +918,12 @@ class Ui_MainWindow(object):
                                                              np.array(dataSet.getNormRSP()),
                                                              color="orange")
 
-                            self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
+                            if (min(dataSet.getNormRSP()) == 0 and max(dataSet.getNormRSP()) == 0):
+                                self.ax4RSP.set_ylim(0, 1)
+
+                            else:
+
+                                self.ax4RSP.set_ylim(min(dataSet.getNormRSP()), max(dataSet.getNormRSP()))
                             self.LineRSP.set_label('RSP')
                             self.LINES.append(self.LineRSP)
                             self.AXISET.append(self.ax4RSP)
@@ -831,9 +954,25 @@ class Ui_MainWindow(object):
                 self.LINE_DIC = dict(zip(self.AXISET, self.LINES))
 
 
+
                 if self.MainChannel!= None:
 
-                     self.subPlot.set_ylim(self.MainChannelMin, self.MainChannelMax)
+
+
+
+                    if self.MainChannelMax==0 and self.MainChannelMin == 0:
+
+
+                        self.subPlot.set_ylim(0, 1)
+
+                    else:
+
+                        self.subPlot.set_ylim(self.MainChannelMin, self.MainChannelMax)
+
+
+                if self.ActiveTriggers==True:
+
+                    self.addTriggers(dataSet,self.MainChannel)
 
                 plt.tight_layout()
                 self.refresh()
@@ -846,6 +985,7 @@ class Ui_MainWindow(object):
             self.ECG.setEnabled(False)
             self.PPG.setEnabled(False)
             self.RSP.setEnabled(False)
+            self.ActivateTriggers.setEnabled(False)
 
 
 
@@ -861,7 +1001,7 @@ class Ui_MainWindow(object):
                                   y[ind["ind"][0]])
 
         if (label == "PPG"):
-            yvalue = self.mapData(self.MainChannelMin,self.MainChannelMax, min(self.CurrentDataSet.getNormPPG()), max(self.CurrentDataSet.getPPGdata()),
+            yvalue = self.mapData(self.MainChannelMin,self.MainChannelMax, min(self.CurrentDataSet.getNormPPG()), max(self.CurrentDataSet.getNormPPG()),
                                   y[ind["ind"][0]])
 
         if (label == "RSP"):
@@ -878,25 +1018,28 @@ class Ui_MainWindow(object):
 
     def Test(self):
 
-        self.TIME = np.sort(np.random.rand(100)) ## constant  for all datasets
+        self.TIME = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,))) ## constant  for all datasets
 
 
         ###Example###
 
-        eda1 = np.sort(np.random.rand(100))
-        eda2 = np.sort(np.random.rand(100))
-        ppg1 = np.sort(np.random.rand(100))
-        ppg2 = np.sort(np.random.rand(100))
-        ecg1 = np.sort(np.random.rand(100))
-        ecg2 = np.sort(np.random.rand(100))
-        rsp1 = np.sort(np.random.rand(100))
-        rsp2 = np.sort(np.random.rand(100))
+        eda1 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
+        eda2 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
+        ppg1 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
+        ppg2 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
+        ecg1 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
+        ecg2 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
+        rsp1 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
+        rsp2 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
 
         dataset1 = DataSet(self.TIME,eda1, ecg1, rsp1, ppg1, self.DataSet1)
 
         dataset2 = DataSet(self.TIME,eda2, ecg2, rsp2, ppg2, self.DataSet2)
 
         self.dataSetArray = [dataset1, dataset2]
+
+
+        self.dataloc = "/Users/thethelafaltein/Desktop/University/Research/copy.xlsx"
 
 
 
@@ -914,14 +1057,18 @@ class Ui_MainWindow(object):
 
         self.Line_Graphs_Overlayed.toggled.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
 
+        self.CorrelationMatrix.toggled.connect(self.getCorrelationMatrix)
+
         self.actionAdd_Data.triggered.connect(self.file_open)
+
+        self.ActivateTriggers.stateChanged.connect(self.actionTrigger)
 
 
     def dataSetAction(self,dataSet):
 
         self.CurrentDataSet = dataSet
 
-        #self.Line_Graphs_Normalized.setEnabled(True)
+        self.CorrelationMatrix.setEnabled(True)
         self.Line_Graphs_Overlayed.setEnabled(True)
 
 
@@ -1017,7 +1164,14 @@ class Ui_MainWindow(object):
 
         if (input_end - input_start) == 0:
 
-            return 0.0
+            return output_start
+
+        if input_end-input_start<0:
+
+            return output_start + ((output_end - output_start) / (input_end - input_start)) * (input - input_start)
+
+
+
 
         else:
 
@@ -1028,6 +1182,145 @@ class Ui_MainWindow(object):
         ax.patch.set_visible(False)
         for sp in ax.spines.values():
             sp.set_visible(False)
+
+
+    def getCorrelationMatrix(self):
+
+
+        plt.clf()
+
+        ##plt.tight_layout()
+
+        self.EDA.setEnabled(False)
+        self.ECG.setEnabled(False)
+        self.PPG.setEnabled(False)
+        self.RSP.setEnabled(False)
+
+        self.HOVER= False
+
+        self.CorrDataSet =  pd.read_excel(self.dataloc, sheet_name='Sheet1')
+
+
+
+
+
+        self.subPlot = plt.subplot(1, 1, 1)
+
+
+
+        self.corr = self.CorrDataSet.corr()
+
+
+        self.hm = sns.heatmap(self.corr, annot=True, ax=self.subPlot, cmap="coolwarm", fmt='.2f',linewidths=.05)
+
+
+
+        self.t = self.fig.suptitle('Physiological Channels Correlation Heatmap', fontsize=14)
+
+
+
+        self.refresh()
+
+
+    def addTriggers(self,dataSet,mainchannel):
+
+
+        triggers = dataSet.getTriggers()
+
+        yvalue = 0
+
+        self.triggernames = ['Experience Starts','Pipe Falls','Boat Hits Pipe','Monster crashes through gate','Monster walks \ninfront of player','Monster leaps \nat player','Experience ends']
+
+
+        if mainchannel=="EDA":
+            if len(dataSet.getNormEDA())==1:
+
+                yvalue = min(dataSet.getNormEDA())
+
+            else:
+
+                array=np.sort(dataSet.getNormEDA())
+
+                yvalue = array[len(dataSet.getNormEDA())-2]
+
+        elif mainchannel == "ECG":
+            if len(dataSet.getNormECG()) == 1:
+
+                yvalue = min(dataSet.getNormECG())
+
+            else:
+
+                array = np.sort(dataSet.getNormECG())
+
+                yvalue = array[len(dataSet.getNormECG()) - 2]
+
+
+        elif mainchannel == "RSP":
+            if len(dataSet.getNormRSP()) == 1:
+
+                yvalue = min(dataSet.getNormRSP())
+
+            else:
+
+                array = np.sort(dataSet.getNormRSP())
+
+                yvalue = array[len(dataSet.getNormRSP()) - 2]
+
+
+        elif mainchannel == "PPG":
+            if len(dataSet.getNormPPG()) == 1:
+
+                yvalue = min(dataSet.getNormPPG())
+
+            else:
+
+                array = np.sort(dataSet.getNormPPG())
+
+                yvalue = array[len(dataSet.getNormPPG()) - 2]
+
+        else:
+            yvalue = self.MainChannelMin
+
+
+
+        for x , z in zip(triggers, self.triggernames):
+
+            self.subPlot.axvline(x, linestyle='dashed', alpha=0.5, color = 'black')
+            self.subPlot.text(x, y=yvalue, horizontalalignment='center', s=z,
+                              verticalalignment='center', alpha=0.7, color='#334f8d')
+
+
+
+    def actionTrigger(self):
+
+        if self.ActivateTriggers.isChecked() == True:
+            self.ActiveTriggers = True
+
+            self.renderLineGraphs(self.CurrentDataSet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":

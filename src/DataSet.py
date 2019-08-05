@@ -43,6 +43,18 @@ class DataSet():
 
         self.TotalNormArray = np.concatenate((self.NormEDA,self.NormECG,self.NormPPG,self.NormRSP))
 
+        ##TRIGGERS####
+
+        self.Triggers = []
+
+        ##Testing ###
+        self.Triggers = [100.00,100.05,100.10,100.25,100.34]
+
+
+
+
+
+
     def getMax(self):
         return max(self.TotalArray)
 
@@ -150,6 +162,12 @@ class DataSet():
             ecg.append((x/1000))
 
         return ecg
+
+    def getTriggers(self):
+        return self.Triggers
+
+    def setTriggers(self,triggers):
+        self.Triggers=triggers
 
 
 
