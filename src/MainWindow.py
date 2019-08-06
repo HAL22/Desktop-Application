@@ -22,7 +22,11 @@ import pandas as pd
 from pandas import ExcelWriter
 from pandas import ExcelFile
 
+import scipy.signal
+
 import seaborn as sns
+
+import matplotlib
 
 
 class Ui_MainWindow(object):
@@ -367,6 +371,8 @@ class Ui_MainWindow(object):
 
         self.ActiveTriggers = False
 
+        self.ActivePeakandTrough = False
+
 
     def hover(self,event):
 
@@ -447,6 +453,19 @@ class Ui_MainWindow(object):
                         self.ax1EDA = self.subPlot
                         self.LineEDA, = self.subPlot.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormEDA()),
                                                           "b-", label="EDA")
+
+                        #### Plots
+
+                        self.peakposition, _ = scipy.signal.find_peaks(-dataSet.NormEDA, height = -3, threshold = None, distance=5)
+
+                        edatime = np.array(dataSet.getTime())
+
+                        edapeak = np.array(dataSet.getNormEDA())
+
+                        self.subPlot.scatter(edatime[self.peakposition],edapeak[self.peakposition],marker=matplotlib.markers.CARETUPBASE, color='tab:green', s=50, label='Peaks')
+
+
+
 
                         self.subPlot.set_ylabel("EDA")
 
@@ -1299,28 +1318,22 @@ class Ui_MainWindow(object):
             self.renderLineGraphs(self.CurrentDataSet)
 
 
+    def addPeakandTrough(self,dataSet):
 
+        if self.ActivePeakandTrough == True:
 
+            for channel in self.Channellabels:
 
+                if channel == "EDA":
 
+                    peak_positive, _ = scipy.signal.find_peaks(np.array(dataSet.getNormEDA()), height=-1, threshold=None, distance=5)
 
+                    peak_negative, _ = scipy.signal.find_peaks(np.array(dataSet.getNormEDA()), height=-1, threshold=None, distance=5)
 
+                    edatime = np.array(dataSet.getTime())
+                    edapeak = np.array(dataSet.getNormEDA())
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                    self.ax1EDA.scatter(edatime[self.peakposition], edapeak[self.peakposition],marker=matplotlib.markers.CARETUPBASE, color='tab:green', s=50, label='Peaks')
 
 
 if __name__ == "__main__":
