@@ -11,7 +11,7 @@ from src.DataSet import DataSet
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QMainWindow, QLabel, QCheckBox, QWidget
+from PyQt5.QtWidgets import QMainWindow, QLabel, QCheckBox, QWidget, QLineEdit,QInputDialog
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import QTimer
 import matplotlib.pyplot as plt
@@ -102,6 +102,9 @@ class Ui_MainWindow(object):
         self.ActivateTriggers = QtWidgets.QCheckBox(self.scrollAreaWidgetContents)
         self.ActivateTriggers.setObjectName("Activate Triggers")
         self.verticalLayout.addWidget(self.ActivateTriggers)
+        self.PeaksandTrough = QtWidgets.QCheckBox(self.scrollAreaWidgetContents)
+        self.PeaksandTrough.setObjectName("Peaks and Troughs")
+        self.verticalLayout.addWidget(self.PeaksandTrough)
         self.LineBreakerTransform = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.LineBreakerTransform.setText("")
         self.LineBreakerTransform.setObjectName("LineBreakerTransform")
@@ -265,6 +268,10 @@ class Ui_MainWindow(object):
 
         self.fig.canvas.mpl_connect("motion_notify_event", self.hover)
 
+        self.fig.canvas.mpl_connect('button_press_event', self.onMouseClick)
+
+        #onMouseClick
+
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -277,6 +284,7 @@ class Ui_MainWindow(object):
         self.Line_Graphs_Overlayed.setText(_translate("MainWindow", "Line Graphs(overlayed)"))
         self.CorrelationMatrix.setText(_translate("MainWindow", "Correlation Matrix"))
         self.ActivateTriggers.setText(_translate("MainWindow", "Activate Triggers"))
+        self.PeaksandTrough.setText(_translate("MainWindow", "Show Peaks and Troughd"))
         self.ChannelLabel.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Channels</span></p></body></html>"))
         self.EDA.setText(_translate("MainWindow", "EDA"))
         self.ECG.setText(_translate("MainWindow", "ECG"))
@@ -323,6 +331,8 @@ class Ui_MainWindow(object):
 
         self.ActivateTriggers.setEnabled(False)
 
+        self.PeaksandTrough.setEnabled(False)
+
 
 
     def setUpVariables(self):
@@ -346,7 +356,7 @@ class Ui_MainWindow(object):
 
 
         #### Initialising the plot area ####
-        self.fig = plt.figure(figsize=(30, 20))
+        self.fig = plt.figure(figsize=(1, 1))
         self.FirgureCanvas = FigureCanvas(self.fig)
         ## Intialise Navigation toolbar
         self.NavtoolWidget = QWidget()
@@ -417,9 +427,13 @@ class Ui_MainWindow(object):
         self.HOVER = False
         plt.clf()
 
+
+
         self.subPlot = plt.subplot(1,1,1)
 
         self.fig.subplots_adjust(right=0.75)
+
+        self.renderUserAnnotations()
 
 
         if dataSet != None:
@@ -453,18 +467,6 @@ class Ui_MainWindow(object):
                         self.ax1EDA = self.subPlot
                         self.LineEDA, = self.subPlot.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormEDA()),
                                                           "b-", label="EDA")
-
-                        #### Plots
-
-                        self.peakposition, _ = scipy.signal.find_peaks(-dataSet.NormEDA, height = -3, threshold = None, distance=5)
-
-                        edatime = np.array(dataSet.getTime())
-
-                        edapeak = np.array(dataSet.getNormEDA())
-
-                        self.subPlot.scatter(edatime[self.peakposition],edapeak[self.peakposition],marker=matplotlib.markers.CARETUPBASE, color='tab:green', s=50, label='Peaks')
-
-
 
 
                         self.subPlot.set_ylabel("EDA")
@@ -957,6 +959,11 @@ class Ui_MainWindow(object):
                             self.ax4RSP.tick_params(axis='y', colors=self.LineRSP.get_color(), **tkw)
 
 
+                if self.ActivePeakandTrough == True:
+
+                    self.addPeakandTrough(dataSet)
+
+
                 if self.LINES != [] and self.Channellabels != []:
                     plt.legend(self.LINES, self.Channellabels)
 
@@ -1005,6 +1012,7 @@ class Ui_MainWindow(object):
             self.PPG.setEnabled(False)
             self.RSP.setEnabled(False)
             self.ActivateTriggers.setEnabled(False)
+
 
 
 
@@ -1082,6 +1090,8 @@ class Ui_MainWindow(object):
 
         self.ActivateTriggers.stateChanged.connect(self.actionTrigger)
 
+        self.PeaksandTrough.stateChanged.connect(self.actionPeakandTrough)
+
 
     def dataSetAction(self,dataSet):
 
@@ -1089,6 +1099,7 @@ class Ui_MainWindow(object):
 
         self.CorrelationMatrix.setEnabled(True)
         self.Line_Graphs_Overlayed.setEnabled(True)
+        self.PeaksandTrough.setEnabled(True)
 
 
     def InitLinePlotData(self):
@@ -1210,6 +1221,8 @@ class Ui_MainWindow(object):
 
         ##plt.tight_layout()
 
+
+
         self.EDA.setEnabled(False)
         self.ECG.setEnabled(False)
         self.PPG.setEnabled(False)
@@ -1230,11 +1243,15 @@ class Ui_MainWindow(object):
         self.corr = self.CorrDataSet.corr()
 
 
-        self.hm = sns.heatmap(self.corr, annot=True, ax=self.subPlot, cmap="coolwarm", fmt='.2f',linewidths=.05)
+
+
+        self.hm = sns.heatmap(self.corr, annot=True, ax=self.subPlot, cmap="coolwarm", fmt='.2f',linewidths=.05,vmin=0)
 
 
 
         self.t = self.fig.suptitle('Physiological Channels Correlation Heatmap', fontsize=14)
+
+
 
 
 
@@ -1260,7 +1277,7 @@ class Ui_MainWindow(object):
 
                 array=np.sort(dataSet.getNormEDA())
 
-                yvalue = array[len(dataSet.getNormEDA())-2]
+                yvalue = array[1]
 
         elif mainchannel == "ECG":
             if len(dataSet.getNormECG()) == 1:
@@ -1271,7 +1288,7 @@ class Ui_MainWindow(object):
 
                 array = np.sort(dataSet.getNormECG())
 
-                yvalue = array[len(dataSet.getNormECG()) - 2]
+                yvalue = array[1]
 
 
         elif mainchannel == "RSP":
@@ -1283,7 +1300,7 @@ class Ui_MainWindow(object):
 
                 array = np.sort(dataSet.getNormRSP())
 
-                yvalue = array[len(dataSet.getNormRSP()) - 2]
+                yvalue = array[1]
 
 
         elif mainchannel == "PPG":
@@ -1295,7 +1312,7 @@ class Ui_MainWindow(object):
 
                 array = np.sort(dataSet.getNormPPG())
 
-                yvalue = array[len(dataSet.getNormPPG()) - 2]
+                yvalue = array[1]
 
         else:
             yvalue = self.MainChannelMin
@@ -1317,6 +1334,11 @@ class Ui_MainWindow(object):
 
             self.renderLineGraphs(self.CurrentDataSet)
 
+        else:
+
+            self.ActiveTriggers = False
+            self.renderLineGraphs(self.CurrentDataSet)
+
 
     def addPeakandTrough(self,dataSet):
 
@@ -1326,14 +1348,133 @@ class Ui_MainWindow(object):
 
                 if channel == "EDA":
 
-                    peak_positive, _ = scipy.signal.find_peaks(np.array(dataSet.getNormEDA()), height=-1, threshold=None, distance=5)
+                    peak_positive, _ = scipy.signal.find_peaks(np.array(dataSet.getNormEDA()), height=-1, threshold=None, distance=10)
 
-                    peak_negative, _ = scipy.signal.find_peaks(np.array(dataSet.getNormEDA()), height=-1, threshold=None, distance=5)
+                    peak_negative, _ = scipy.signal.find_peaks(-np.array(dataSet.getNormEDA()), height=-3, threshold=None, distance=10)
 
-                    edatime = np.array(dataSet.getTime())
-                    edapeak = np.array(dataSet.getNormEDA())
+                    Time = np.array(dataSet.getTime())
+                    data = np.array(dataSet.getNormEDA())
 
-                    self.ax1EDA.scatter(edatime[self.peakposition], edapeak[self.peakposition],marker=matplotlib.markers.CARETUPBASE, color='tab:green', s=50, label='Peaks')
+                    self.ax1EDA.scatter(Time[peak_positive], data[peak_positive],marker=matplotlib.markers.CARETUPBASE, color='tab:green', s=20, label='Peaks')
+
+                    self.ax1EDA.scatter(Time[peak_negative], data[peak_negative],marker=matplotlib.markers.CARETDOWNBASE, color='tab:red', s=20, label='Troughs')
+
+
+                elif channel == "ECG":
+
+                    peak_positive, _ = scipy.signal.find_peaks(np.array(dataSet.getNormECG()), height=-1, threshold=None, distance=5)
+
+                    peak_negative, _ = scipy.signal.find_peaks(-np.array(dataSet.getNormECG()), height=-3, threshold=None, distance=5)
+
+                    Time = np.array(dataSet.getTime())
+                    data = np.array(dataSet.getNormECG())
+
+                    self.ax2ECG.scatter(Time[peak_positive], data[peak_positive],marker=matplotlib.markers.CARETUPBASE, color='tab:green', s=20, label='Peaks')
+
+                    self.ax2ECG.scatter(Time[peak_negative], data[peak_negative],marker=matplotlib.markers.CARETDOWNBASE, color='tab:red', s=20, label='Troughs')
+
+
+                elif channel == "PPG":
+
+                    peak_positive, _ = scipy.signal.find_peaks(np.array(dataSet.getNormPPG()), height=-1, threshold=None, distance=5)
+
+                    peak_negative, _ = scipy.signal.find_peaks(-np.array(dataSet.getNormPPG()), height=-3, threshold=None, distance=5)
+
+                    Time = np.array(dataSet.getTime())
+                    data = np.array(dataSet.getNormPPG())
+
+                    self.ax3PPG.scatter(Time[peak_positive], data[peak_positive],marker=matplotlib.markers.CARETUPBASE, color='tab:green', s=20, label='Peaks')
+
+                    self.ax3PPG.scatter(Time[peak_negative], data[peak_negative],marker=matplotlib.markers.CARETDOWNBASE, color='tab:red', s=20, label='Troughs')
+
+                elif channel == "RSP":
+
+                    peak_positive, _ = scipy.signal.find_peaks(np.array(dataSet.getNormRSP()), height=-1, threshold=None, distance=5)
+
+                    peak_negative, _ = scipy.signal.find_peaks(-np.array(dataSet.getNormRSP()), height=-3, threshold=None, distance=5)
+
+                    Time = np.array(dataSet.getTime())
+                    data = np.array(dataSet.getNormRSP())
+
+                    self.ax4RSP.scatter(Time[peak_positive], data[peak_positive],marker=matplotlib.markers.CARETUPBASE, color='tab:green', s=20, label='Peaks')
+
+                    self.ax4RSP.scatter(Time[peak_negative], data[peak_negative],marker=matplotlib.markers.CARETDOWNBASE, color='tab:red', s=20, label='Troughs')
+
+
+
+    def actionPeakandTrough(self):
+
+
+        if self.PeaksandTrough.isChecked()==True:
+
+            self.ActivePeakandTrough = True
+
+            self.renderLineGraphs(self.CurrentDataSet)
+
+        else:
+
+            self.ActivePeakandTrough = False
+
+            self.renderLineGraphs(self.CurrentDataSet)
+
+
+    def onMouseClick(self,event):
+
+        okPressed,text = self.getText()
+
+        if okPressed and text!='':
+
+            if event.button == event.button.LEFT:
+                annot = plt.annotate("", xy=(0, 0), xytext=(0, 0), textcoords="offset points",
+                                     bbox=dict(boxstyle="round", fc="w", alpha=0.4),
+                                     arrowprops=dict(arrowstyle="->"))
+
+                # annot.set_visible(False)
+
+                annot.xy = (event.xdata, event.ydata)
+
+                annot.set_text(text)
+
+                # annot.set_visible(True)
+
+                self.CurrentDataSet.getUserAnnotation().append(annot)
+
+                self.refresh()
+
+        ## add annotation
+
+        if event.button == event.button.RIGHT:
+
+          for index, item in enumerate(self.CurrentDataSet.getUserAnnotation()):
+
+              if(item.xy == (event.xdata,event.ydata)):
+
+
+                  self.CurrentDataSet.getUserAnnotation().remove(item)
+
+                  item.remove()
+
+
+
+
+                  self.refresh()
+
+
+    def renderUserAnnotations(self):
+
+        for annot in self.CurrentDataSet.getUserAnnotation():
+
+            ann = plt.annotate("", xy=(0, 0), xytext=(0, 0), textcoords="offset points",
+                                          bbox=dict(boxstyle="round", fc="w", alpha=0.4),
+                                          arrowprops=dict(arrowstyle="->"))
+
+            ann.xy = annot.xy
+            ann.set_text(annot.get_text())
+
+    def getText(self):
+        text, okPressed = QInputDialog.getText(self.centralwidget, "Get text", "Your name:", QLineEdit.Normal, "")
+
+        return okPressed,text;
 
 
 if __name__ == "__main__":

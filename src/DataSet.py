@@ -51,6 +51,11 @@ class DataSet():
         self.Triggers = [100.00,100.05,100.10,100.25,100.34]
 
 
+        ##Annotation##
+
+        self.UserAnnotations = []
+
+
 
 
 
@@ -168,6 +173,14 @@ class DataSet():
 
     def setTriggers(self,triggers):
         self.Triggers=triggers
+
+    def getUserAnnotation(self):
+        return self.UserAnnotations
+
+    def setUserAnnotation(self,userannotation):
+
+        self.UserAnnotations = userannotation
+
 
 
 
