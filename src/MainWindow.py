@@ -263,14 +263,11 @@ class Ui_MainWindow(object):
 
         self.Test()
 
-
         self.Events()
 
         self.fig.canvas.mpl_connect("motion_notify_event", self.hover)
 
         self.fig.canvas.mpl_connect('button_press_event', self.onMouseClick)
-
-        #onMouseClick
 
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -353,10 +350,13 @@ class Ui_MainWindow(object):
 
         self.numDataSet = 2 ## Number of data sets
 
+        self.triggernames = ['Experience Starts','Pipe Falls','Boat Hits Pipe','Monster crashes through gate','Monster walks \ninfront of player','Monster leaps \nat player','Experience ends']
+
+
 
 
         #### Initialising the plot area ####
-        self.fig = plt.figure(figsize=(1, 1))
+        self.fig = plt.figure(figsize=(30, 30))
         self.FirgureCanvas = FigureCanvas(self.fig)
         ## Intialise Navigation toolbar
         self.NavtoolWidget = QWidget()
@@ -433,10 +433,12 @@ class Ui_MainWindow(object):
 
         self.fig.subplots_adjust(right=0.75)
 
-        self.renderUserAnnotations()
+
 
 
         if dataSet != None:
+
+
 
             self.EDA.setEnabled(True)
             self.ECG.setEnabled(True)
@@ -468,8 +470,10 @@ class Ui_MainWindow(object):
                         self.LineEDA, = self.subPlot.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormEDA()),
                                                           "b-", label="EDA")
 
-
                         self.subPlot.set_ylabel("EDA")
+
+
+
 
                         if(min(dataSet.getNormEDA()) ==0 and max(dataSet.getNormEDA()) == 0):
                             self.ax1EDA.set_ylim(0,1)
@@ -959,6 +963,12 @@ class Ui_MainWindow(object):
                             self.ax4RSP.tick_params(axis='y', colors=self.LineRSP.get_color(), **tkw)
 
 
+
+               # self.altax = self.subPlot.twiny()
+
+
+
+
                 if self.ActivePeakandTrough == True:
 
                     self.addPeakandTrough(dataSet)
@@ -999,6 +1009,8 @@ class Ui_MainWindow(object):
                 if self.ActiveTriggers==True:
 
                     self.addTriggers(dataSet,self.MainChannel)
+
+                self.renderUserAnnotations()
 
                 plt.tight_layout()
                 self.refresh()
@@ -1219,7 +1231,12 @@ class Ui_MainWindow(object):
 
         plt.clf()
 
-        ##plt.tight_layout()
+
+
+        data = np.random.rand(4, 4)
+
+
+
 
 
 
@@ -1232,20 +1249,16 @@ class Ui_MainWindow(object):
 
         self.CorrDataSet =  pd.read_excel(self.dataloc, sheet_name='Sheet1')
 
-
-
-
-
-        self.subPlot = plt.subplot(1, 1, 1)
-
-
-
         self.corr = self.CorrDataSet.corr()
 
+        mask=self.corr.isnull()
 
 
 
-        self.hm = sns.heatmap(self.corr, annot=True, ax=self.subPlot, cmap="coolwarm", fmt='.2f',linewidths=.05,vmin=0)
+
+        self.hm = sns.heatmap(self.corr,annot=True, cmap="coolwarm", fmt='.2f',linewidths=.05,vmin=0,square=True,mask=mask)
+
+
 
 
 
@@ -1253,9 +1266,10 @@ class Ui_MainWindow(object):
 
 
 
-
-
         self.refresh()
+
+
+
 
 
     def addTriggers(self,dataSet,mainchannel):
@@ -1268,62 +1282,28 @@ class Ui_MainWindow(object):
         self.triggernames = ['Experience Starts','Pipe Falls','Boat Hits Pipe','Monster crashes through gate','Monster walks \ninfront of player','Monster leaps \nat player','Experience ends']
 
 
-        if mainchannel=="EDA":
-            if len(dataSet.getNormEDA())==1:
+        self.triggerAxis = self.subPlot.twiny()
+        self.triggerAxis.xaxis.set_ticks_position("bottom")
+        self.triggerAxis.xaxis.set_label_position("bottom")
+        self.triggerAxis.spines["bottom"].set_position(("axes", -0.15))
 
-                yvalue = min(dataSet.getNormEDA())
+        self.make_patch_spines_invisible(self.triggerAxis)
 
-            else:
-
-                array=np.sort(dataSet.getNormEDA())
-
-                yvalue = array[1]
-
-        elif mainchannel == "ECG":
-            if len(dataSet.getNormECG()) == 1:
-
-                yvalue = min(dataSet.getNormECG())
-
-            else:
-
-                array = np.sort(dataSet.getNormECG())
-
-                yvalue = array[1]
-
-
-        elif mainchannel == "RSP":
-            if len(dataSet.getNormRSP()) == 1:
-
-                yvalue = min(dataSet.getNormRSP())
-
-            else:
-
-                array = np.sort(dataSet.getNormRSP())
-
-                yvalue = array[1]
-
-
-        elif mainchannel == "PPG":
-            if len(dataSet.getNormPPG()) == 1:
-
-                yvalue = min(dataSet.getNormPPG())
-
-            else:
-
-                array = np.sort(dataSet.getNormPPG())
-
-                yvalue = array[1]
-
-        else:
-            yvalue = self.MainChannelMin
+        self.triggerAxis.spines["bottom"].set_visible(True)
 
 
 
-        for x , z in zip(triggers, self.triggernames):
+
+        self.triggerAxis.set_xlim(self.subPlot.get_xlim())
+        self.triggerAxis.set_xticks(dataSet.getTriggers())
+        self.triggerAxis.set_xticklabels(self.triggernames)
+
+
+
+        for x in triggers:
 
             self.subPlot.axvline(x, linestyle='dashed', alpha=0.5, color = 'black')
-            self.subPlot.text(x, y=yvalue, horizontalalignment='center', s=z,
-                              verticalalignment='center', alpha=0.7, color='#334f8d')
+
 
 
 
@@ -1472,9 +1452,11 @@ class Ui_MainWindow(object):
             ann.set_text(annot.get_text())
 
     def getText(self):
-        text, okPressed = QInputDialog.getText(self.centralwidget, "Get text", "Your name:", QLineEdit.Normal, "")
+        text, okPressed = QInputDialog.getText(self.centralwidget, "Annotation", "Enter text:", QLineEdit.Normal, "")
 
         return okPressed,text;
+
+
 
 
 if __name__ == "__main__":
