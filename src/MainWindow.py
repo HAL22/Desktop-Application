@@ -28,7 +28,6 @@ import seaborn as sns
 
 import matplotlib
 
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -68,12 +67,6 @@ class Ui_MainWindow(object):
         self.DataSetLabel.setMaximumSize(QtCore.QSize(16777215, 21))
         self.DataSetLabel.setObjectName("DataSetLabel")
         self.verticalLayout_3.addWidget(self.DataSetLabel)
-        self.DataSet1 = QtWidgets.QRadioButton(self.left_left_scrollarea_widget)
-        self.DataSet1.setObjectName("DataSet1")
-        self.verticalLayout_3.addWidget(self.DataSet1)
-        self.DataSet2 = QtWidgets.QRadioButton(self.left_left_scrollarea_widget)
-        self.DataSet2.setObjectName("DataSet2")
-        self.verticalLayout_3.addWidget(self.DataSet2)
         self.LineBreakerDataSet = QtWidgets.QLabel(self.left_left_scrollarea_widget)
         self.LineBreakerDataSet.setText("")
         self.LineBreakerDataSet.setObjectName("LineBreakerDataSet")
@@ -135,10 +128,6 @@ class Ui_MainWindow(object):
         self.EDA.setChecked(True)
         self.EDA.setTristate(False)
         self.EDA.setObjectName("EDA")
-
-
-
-
         self.verticalLayout_5.addWidget(self.EDA)
         self.ECG = QtWidgets.QCheckBox(self.left_right_scrollarea_widget)
         self.ECG.setChecked(True)
@@ -256,12 +245,16 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionDownload_data)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionExit_Application)
+        
+
+
 
         self.retranslateUi(MainWindow)
+
         self.setUpVariables()
+
         self.InitWindow()
 
-        self.Test()
 
         self.Events()
 
@@ -269,14 +262,15 @@ class Ui_MainWindow(object):
 
         self.fig.canvas.mpl_connect('button_press_event', self.onMouseClick)
 
+
+
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
+
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.DataSetLabel.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Data Set(s)</span></p></body></html>"))
-        self.DataSet1.setText(_translate("MainWindow", "DataSet1"))
-        self.DataSet2.setText(_translate("MainWindow", "DataSet2"))
         self.TransformLabel.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Transform</span></p></body></html>"))
         self.Line_Graphs_Overlayed.setText(_translate("MainWindow", "Line Graphs(overlayed)"))
         self.CorrelationMatrix.setText(_translate("MainWindow", "Correlation Matrix"))
@@ -304,9 +298,6 @@ class Ui_MainWindow(object):
         self.actionDownload_data.setText(_translate("MainWindow", "Download data"))
 
 
-
-
-
     def InitWindow(self):
 
         self.EDA.setChecked(False)
@@ -332,6 +323,8 @@ class Ui_MainWindow(object):
 
 
 
+
+
     def setUpVariables(self):
 
         self.dataSetArray = []  ## array that will store the datasets
@@ -351,7 +344,6 @@ class Ui_MainWindow(object):
         self.numDataSet = 2 ## Number of data sets
 
         self.triggernames = ['Experience Starts','Pipe Falls','Boat Hits Pipe','Monster crashes through gate','Monster walks \ninfront of player','Monster leaps \nat player','Experience ends']
-
 
 
 
@@ -382,6 +374,11 @@ class Ui_MainWindow(object):
         self.ActiveTriggers = False
 
         self.ActivePeakandTrough = False
+
+        self.matrixdataloc = ""
+
+        self.AddUserAnnotations = False
+
 
 
     def hover(self,event):
@@ -423,22 +420,21 @@ class Ui_MainWindow(object):
     def renderLineGraphs(self,dataSet):
 
 
-
         self.HOVER = False
         plt.clf()
 
+        plt.tight_layout()
 
+        self.fig.subplots_adjust(right=0.70)
 
         self.subPlot = plt.subplot(1,1,1)
-
-        self.fig.subplots_adjust(right=0.75)
-
 
 
 
         if dataSet != None:
 
 
+            self.AddUserAnnotations = True
 
             self.EDA.setEnabled(True)
             self.ECG.setEnabled(True)
@@ -451,7 +447,11 @@ class Ui_MainWindow(object):
 
             plt.title('Physiological data', fontsize=10)
             plt.xlabel('Time in microsecond', fontsize=10)
-           ## plt.ylabel('Magnitude', fontsize=10)
+
+
+
+
+
 
 
             self.InitLinePlotData()
@@ -460,6 +460,12 @@ class Ui_MainWindow(object):
 
 
                 self.HOVER=True
+
+
+
+
+
+
 
                 if self.EDA.isChecked() == True:
 
@@ -471,6 +477,8 @@ class Ui_MainWindow(object):
                                                           "b-", label="EDA")
 
                         self.subPlot.set_ylabel("EDA")
+
+
 
 
 
@@ -876,7 +884,7 @@ class Ui_MainWindow(object):
 
                             self.LineRSP, = self.ax4RSP.plot(np.array(dataSet.getTime()),
                                                               np.array(dataSet.getNormRSP()),
-                                                              'go')
+                                                              'orange')
 
                             if (min(dataSet.getNormRSP()) == 0 and max(dataSet.getNormRSP()) == 0):
                                 self.ax4RSP.set_ylim(0, 1)
@@ -1012,7 +1020,8 @@ class Ui_MainWindow(object):
 
                 self.renderUserAnnotations()
 
-                plt.tight_layout()
+
+
                 self.refresh()
 
 
@@ -1055,30 +1064,6 @@ class Ui_MainWindow(object):
 
 
 
-    def Test(self):
-
-        self.TIME = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,))) ## constant  for all datasets
-
-
-        ###Example###
-
-        eda1 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
-        eda2 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
-        ppg1 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
-        ppg2 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
-        ecg1 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
-        ecg2 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
-        rsp1 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
-        rsp2 = np.sort(np.random.uniform(low=1.0,high=1000.5,size=(100,)))
-
-        dataset1 = DataSet(self.TIME,eda1, ecg1, rsp1, ppg1, self.DataSet1)
-
-        dataset2 = DataSet(self.TIME,eda2, ecg2, rsp2, ppg2, self.DataSet2)
-
-        self.dataSetArray = [dataset1, dataset2]
-
-
-        self.dataloc = "/Users/thethelafaltein/Desktop/University/Research/copy.xlsx"
 
 
 
@@ -1089,10 +1074,6 @@ class Ui_MainWindow(object):
         self.ECG.stateChanged.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
         self.RSP.stateChanged.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
         self.EDA.stateChanged.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
-
-        self.DataSet1.toggled.connect(lambda: self.dataSetAction(self.dataSetArray[0]))
-        self.DataSet2.toggled.connect(lambda: self.dataSetAction(self.dataSetArray[1]))
-
 
         self.Line_Graphs_Overlayed.toggled.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
 
@@ -1148,7 +1129,8 @@ class Ui_MainWindow(object):
 
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow, "Open File")
 
-        self.read_data(filename)
+        if(filename != ''):
+            self.read_data(filename)
 
     def read_data(self, filename):
 
@@ -1165,22 +1147,24 @@ class Ui_MainWindow(object):
         for i in range(sheet.ncols):
             for j in range(sheet.nrows):
 
-                if i == 0:
+                if i == 0 and j!=0:
                     time.append(sheet.cell_value(j, i))
 
-                if i == 1:
+                if i == 1 and j!=0:
                     ppg.append(sheet.cell_value(j, i))
 
-                if i == 2:
+                if i == 2 and j!=0:
                     rsp.append(sheet.cell_value(j, i))
 
-                if i == 3:
+                if i == 3 and j!=0:
                     eda.append(sheet.cell_value(j, i))
 
-                if i == 4:
+                if i == 4 and j!=0:
                     ecg.append(sheet.cell_value(j, i))
 
         self.createButton(eda, ecg, rsp, ppg, time)
+
+        self.matrixdataloc = filename
 
     def createButton(self, eda, ecg, rsp, ppg, time):
 
@@ -1200,6 +1184,8 @@ class Ui_MainWindow(object):
 
         self.RadioButtonsArray.append(radiobutton)
         self.dataSetArray.append(dataset)
+
+
 
     def mapData(self,output_start,output_end,input_start,input_end,input):
 
@@ -1229,48 +1215,33 @@ class Ui_MainWindow(object):
     def getCorrelationMatrix(self):
 
 
-        plt.clf()
+        if self.matrixdataloc !="":
 
+            self.AddUserAnnotations = False
 
+            plt.clf()
 
-        data = np.random.rand(4, 4)
+            data = np.random.rand(4, 4)
 
+            self.EDA.setEnabled(False)
+            self.ECG.setEnabled(False)
+            self.PPG.setEnabled(False)
+            self.RSP.setEnabled(False)
 
+            self.HOVER = False
 
+            self.CorrDataSet = pd.read_excel(self.matrixdataloc, sheet_name='Sheet1')
 
+            self.corr = self.CorrDataSet.corr()
 
+            mask = self.corr.isnull()
 
-        self.EDA.setEnabled(False)
-        self.ECG.setEnabled(False)
-        self.PPG.setEnabled(False)
-        self.RSP.setEnabled(False)
+            self.hm = sns.heatmap(self.corr, annot=True, cmap="coolwarm", fmt='.2f', linewidths=.05, vmin=0,
+                                  square=True, mask=mask)
 
-        self.HOVER= False
+            self.t = self.fig.suptitle('Physiological Channels Correlation Heatmap', fontsize=14)
 
-        self.CorrDataSet =  pd.read_excel(self.dataloc, sheet_name='Sheet1')
-
-        self.corr = self.CorrDataSet.corr()
-
-        mask=self.corr.isnull()
-
-
-
-
-        self.hm = sns.heatmap(self.corr,annot=True, cmap="coolwarm", fmt='.2f',linewidths=.05,vmin=0,square=True,mask=mask)
-
-
-
-
-
-        self.t = self.fig.suptitle('Physiological Channels Correlation Heatmap', fontsize=14)
-
-
-
-        self.refresh()
-
-
-
-
+            self.refresh()
 
     def addTriggers(self,dataSet,mainchannel):
 
@@ -1282,7 +1253,7 @@ class Ui_MainWindow(object):
         self.triggernames = ['Experience Starts','Pipe Falls','Boat Hits Pipe','Monster crashes through gate','Monster walks \ninfront of player','Monster leaps \nat player','Experience ends']
 
 
-        self.triggerAxis = self.subPlot.twiny()
+        self.triggerAxis = self.subPlot
         self.triggerAxis.xaxis.set_ticks_position("bottom")
         self.triggerAxis.xaxis.set_label_position("bottom")
         self.triggerAxis.spines["bottom"].set_position(("axes", -0.15))
@@ -1303,6 +1274,8 @@ class Ui_MainWindow(object):
         for x in triggers:
 
             self.subPlot.axvline(x, linestyle='dashed', alpha=0.5, color = 'black')
+
+        self.refresh()
 
 
 
@@ -1400,61 +1373,402 @@ class Ui_MainWindow(object):
 
     def onMouseClick(self,event):
 
-        okPressed,text = self.getText()
 
-        if okPressed and text!='':
-
-            if event.button == event.button.LEFT:
-                annot = plt.annotate("", xy=(0, 0), xytext=(0, 0), textcoords="offset points",
-                                     bbox=dict(boxstyle="round", fc="w", alpha=0.4),
-                                     arrowprops=dict(arrowstyle="->"))
-
-                # annot.set_visible(False)
-
-                annot.xy = (event.xdata, event.ydata)
-
-                annot.set_text(text)
-
-                # annot.set_visible(True)
-
-                self.CurrentDataSet.getUserAnnotation().append(annot)
-
-                self.refresh()
-
-        ## add annotation
-
-        if event.button == event.button.RIGHT:
-
-          for index, item in enumerate(self.CurrentDataSet.getUserAnnotation()):
-
-              if(item.xy == (event.xdata,event.ydata)):
-
-
-                  self.CurrentDataSet.getUserAnnotation().remove(item)
-
-                  item.remove()
+        if self.AddUserAnnotations == True:
 
 
 
 
-                  self.refresh()
+            if event.dblclick == True:
+
+
+
+                if event.button==event.button.LEFT:
+
+                    ## add annotation
+
+                    okPressed, text = self.getText()
+
+                    if okPressed and text != '':
+
+                        if event.button == event.button.LEFT and event.dblclick == True:
+
+                            if self.MainChannel=="EDA":
+
+                                self.CurrentDataSet.getAxisAnnotation().append(self.CurrentDataSet.getNormEDA())
+
+                                if self.Channellabels[-1] == "ECG":
+
+                                    yvalue = self.mapData(min(self.CurrentDataSet.getNormEDA()),
+                                                          max(self.CurrentDataSet.getNormEDA()), min(self.CurrentDataSet.getNormECG()), max(self.CurrentDataSet.getNormECG()),
+                                                          event.ydata)
+
+                                elif self.Channellabels[-1] == "PPG":
+
+                                    yvalue = self.mapData(min(self.CurrentDataSet.getNormEDA()),
+                                                          max(self.CurrentDataSet.getNormEDA()), min(self.CurrentDataSet.getNormPPG()), max(self.CurrentDataSet.getNormPPG()),
+                                                          event.ydata)
+
+                                elif self.Channellabels[-1] == "RSP":
+
+                                    yvalue = self.mapData(min(self.CurrentDataSet.getNormEDA()),
+                                                          max(self.CurrentDataSet.getNormEDA()), min(self.CurrentDataSet.getNormRSP()), max(self.CurrentDataSet.getNormRSP()),
+                                                          event.ydata)
+
+                                else:
+
+                                    yvalue = event.ydata
+
+
+                            elif self.MainChannel=="ECG":
+
+                                self.CurrentDataSet.getAxisAnnotation().append(self.CurrentDataSet.getNormECG())
+
+
+                                if self.Channellabels[-1] == "EDA":
+
+                                    yvalue = self.mapData(min(self.CurrentDataSet.getNormECG()),
+                                                          max(self.CurrentDataSet.getNormECG()), min(self.CurrentDataSet.getNormEDA()), max(self.CurrentDataSet.getNormEDA()),
+                                                          event.ydata)
+
+                                elif self.Channellabels[-1] == "PPG":
+
+                                    yvalue = self.mapData(min(self.CurrentDataSet.getNormECG()),
+                                                          max(self.CurrentDataSet.getNormECG()), min(self.CurrentDataSet.getNormPPG()), max(self.CurrentDataSet.getNormPPG()),
+                                                          event.ydata)
+
+                                elif self.Channellabels[-1] == "RSP":
+
+                                    yvalue = self.mapData(min(self.CurrentDataSet.getNormECG()),
+                                                          max(self.CurrentDataSet.getNormECG()), min(self.CurrentDataSet.getNormRSP()), max(self.CurrentDataSet.getNormRSP()),
+                                                          event.ydata)
+
+                                else:
+
+                                    yvalue = event.ydata
+
+
+
+
+
+
+
+
+                            elif self.MainChannel=="PPG":
+
+                                self.CurrentDataSet.getAxisAnnotation().append(self.CurrentDataSet.getNormPPG())
+
+                                if self.Channellabels[-1] == "EDA":
+
+                                    yvalue = self.mapData(min(self.CurrentDataSet.getNormPPG()),
+                                                          max(self.CurrentDataSet.getNormPPG()),
+                                                          min(self.CurrentDataSet.getNormEDA()),
+                                                          max(self.CurrentDataSet.getNormEDA()),
+                                                          event.ydata)
+
+                                elif self.Channellabels[-1] == "ECG":
+
+                                    yvalue = self.mapData(min(self.CurrentDataSet.getNormPPG()),
+                                                          max(self.CurrentDataSet.getNormPPG()),
+                                                          min(self.CurrentDataSet.getNormECG()),
+                                                          max(self.CurrentDataSet.getNormECG()),
+                                                          event.ydata)
+
+                                elif self.Channellabels[-1] == "RSP":
+
+                                    yvalue = self.mapData(min(self.CurrentDataSet.getNormPPG()),
+                                                          max(self.CurrentDataSet.getNormPPG()),
+                                                          min(self.CurrentDataSet.getNormRSP()),
+                                                          max(self.CurrentDataSet.getNormRSP()),
+                                                          event.ydata)
+
+                                else:
+
+                                    yvalue = event.ydata
+
+
+
+
+
+
+
+
+                            elif self.MainChannel=="RSP":
+
+                                self.CurrentDataSet.getAxisAnnotation().append(self.CurrentDataSet.getNormRSP())
+
+
+                                if self.Channellabels[-1] == "EDA":
+
+                                    yvalue = self.mapData(min(self.CurrentDataSet.getNormRSP()),
+                                                          max(self.CurrentDataSet.getNormRSP()),
+                                                          min(self.CurrentDataSet.getNormEDA()),
+                                                          max(self.CurrentDataSet.getNormEDA()),
+                                                          event.ydata)
+
+                                elif self.Channellabels[-1] == "ECG":
+
+                                    yvalue = self.mapData(min(self.CurrentDataSet.getNormRSP()),
+                                                          max(self.CurrentDataSet.getNormRSP()),
+                                                          min(self.CurrentDataSet.getNormECG()),
+                                                          max(self.CurrentDataSet.getNormECG()),
+                                                          event.ydata)
+
+                                elif self.Channellabels[-1] == "PPG":
+
+                                    yvalue = self.mapData(min(self.CurrentDataSet.getNormRSP()),
+                                                          max(self.CurrentDataSet.getNormRSP()),
+                                                          min(self.CurrentDataSet.getNormPPG()),
+                                                          max(self.CurrentDataSet.getNormPPG()),
+                                                          event.ydata)
+
+                                else:
+
+                                    yvalue = event.ydata
+
+
+
+                            annot = self.subPlot.annotate("", xy=(0, 0), xytext=(0, 0), textcoords="offset points",
+                                                 bbox=dict(boxstyle="round", fc="w", alpha=0.4),
+                                                 arrowprops=dict(arrowstyle="->"))
+
+                            annot.set_visible(False)
+
+
+
+                            annot.xy = (event.xdata, yvalue)
+
+                            print(annot.xy)
+
+                            annot.set_text(text)
+
+                            annot.set_visible(True)
+
+                            self.CurrentDataSet.getUserAnnotation().append(annot)
+
+                            self.refresh()
+
+
+                elif event.button == event.button.RIGHT:
+
+                    for item,array in zip(self.CurrentDataSet.getUserAnnotation(),self.CurrentDataSet.getAxisAnnotation()):
+
+                        yvalue = self.mapdataAnnotation(event.ydata)
+
+
+
+                        if (item.xy == (event.xdata,yvalue)):
+
+
+
+
+
+                            self.CurrentDataSet.getUserAnnotation().remove(item)
+
+                            self.CurrentDataSet.getAxisAnnotation().remove(array)
+
+                            item.remove()
+
+                            self.refresh()
+
+
+
+
+    def mapdataAnnotation(self,y):
+
+
+        if self.MainChannel == "EDA":
+
+
+            if self.Channellabels[-1] == "ECG":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormEDA()),
+                                      max(self.CurrentDataSet.getNormEDA()), min(self.CurrentDataSet.getNormECG()),
+                                      max(self.CurrentDataSet.getNormECG()),
+                                      y)
+
+            elif self.Channellabels[-1] == "PPG":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormEDA()),
+                                      max(self.CurrentDataSet.getNormEDA()), min(self.CurrentDataSet.getNormPPG()),
+                                      max(self.CurrentDataSet.getNormPPG()),
+                                     y)
+
+            elif self.Channellabels[-1] == "RSP":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormEDA()),
+                                      max(self.CurrentDataSet.getNormEDA()), min(self.CurrentDataSet.getNormRSP()),
+                                      max(self.CurrentDataSet.getNormRSP()),
+                                      y)
+
+            else:
+
+                yvalue = y
+
+
+        elif self.MainChannel == "ECG":
+
+
+            if self.Channellabels[-1] == "EDA":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormECG()),
+                                      max(self.CurrentDataSet.getNormECG()), min(self.CurrentDataSet.getNormEDA()),
+                                      max(self.CurrentDataSet.getNormEDA()),
+                                      y)
+
+            elif self.Channellabels[-1] == "PPG":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormECG()),
+                                      max(self.CurrentDataSet.getNormECG()), min(self.CurrentDataSet.getNormPPG()),
+                                      max(self.CurrentDataSet.getNormPPG()),
+                                      y)
+
+            elif self.Channellabels[-1] == "RSP":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormECG()),
+                                      max(self.CurrentDataSet.getNormECG()), min(self.CurrentDataSet.getNormRSP()),
+                                      max(self.CurrentDataSet.getNormRSP()),
+                                      y)
+
+            else:
+
+                yvalue = y
+
+
+
+
+        elif self.MainChannel == "PPG":
+
+
+            if self.Channellabels[-1] == "EDA":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormPPG()),
+                                      max(self.CurrentDataSet.getNormPPG()),
+                                      min(self.CurrentDataSet.getNormEDA()),
+                                      max(self.CurrentDataSet.getNormEDA()),
+                                      y)
+
+            elif self.Channellabels[-1] == "ECG":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormPPG()),
+                                      max(self.CurrentDataSet.getNormPPG()),
+                                      min(self.CurrentDataSet.getNormECG()),
+                                      max(self.CurrentDataSet.getNormECG()),
+                                     y)
+
+            elif self.Channellabels[-1] == "RSP":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormPPG()),
+                                      max(self.CurrentDataSet.getNormPPG()),
+                                      min(self.CurrentDataSet.getNormRSP()),
+                                      max(self.CurrentDataSet.getNormRSP()),
+                                      y)
+
+            else:
+
+                yvalue = y
+
+
+
+
+
+
+
+
+
+
+
+
+
+        elif self.MainChannel == "RSP":
+
+
+            if self.Channellabels[-1] == "EDA":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormRSP()),
+                                      max(self.CurrentDataSet.getNormRSP()),
+                                      min(self.CurrentDataSet.getNormEDA()),
+                                      max(self.CurrentDataSet.getNormEDA()),
+                                      y)
+
+            elif self.Channellabels[-1] == "ECG":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormRSP()),
+                                      max(self.CurrentDataSet.getNormRSP()),
+                                      min(self.CurrentDataSet.getNormECG()),
+                                      max(self.CurrentDataSet.getNormECG()),
+                                      y)
+
+            elif self.Channellabels[-1] == "PPG":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormRSP()),
+                                      max(self.CurrentDataSet.getNormRSP()),
+                                      min(self.CurrentDataSet.getNormPPG()),
+                                      max(self.CurrentDataSet.getNormPPG()),
+                                      y)
+
+            else:
+
+                yvalue = y
+
+        return yvalue
+
+
 
 
     def renderUserAnnotations(self):
 
-        for annot in self.CurrentDataSet.getUserAnnotation():
+        for annot,axis in zip(self.CurrentDataSet.getUserAnnotation(),self.CurrentDataSet.getAxisAnnotation()):
 
-            ann = plt.annotate("", xy=(0, 0), xytext=(0, 0), textcoords="offset points",
+            ann = self.subPlot.annotate("", xy=(0, 0), xytext=(0, 0), textcoords="offset points",
                                           bbox=dict(boxstyle="round", fc="w", alpha=0.4),
                                           arrowprops=dict(arrowstyle="->"))
 
-            ann.xy = annot.xy
+
+
+
+
+
+            if self.MainChannel == "EDA":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormEDA()),max(self.CurrentDataSet.getNormEDA()),min(axis),max(axis),annot.xy[1])
+
+            elif self.MainChannel == "ECG":
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormECG()), max(self.CurrentDataSet.getNormECG()),
+                                      min(axis),
+                                      max(axis), annot.xy[1])
+
+            elif self.MainChannel == "PPG":
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormPPG()), max(self.CurrentDataSet.getNormPPG()),
+                                      min(axis),
+                                      max(axis), annot.xy[1])
+
+            elif self.MainChannel == "RSP":
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormRSP()), max(self.CurrentDataSet.getNormRSP()),
+                                      min(axis),
+                                      max(axis), annot.xy[1])
+
+
+
+
+            ann.xy = (annot.xy[0],yvalue)
+           # print("Before transformation ")
+          #  print(annot.xy)
+           # print(ann.xy)
             ann.set_text(annot.get_text())
+
+
 
     def getText(self):
         text, okPressed = QInputDialog.getText(self.centralwidget, "Annotation", "Enter text:", QLineEdit.Normal, "")
 
         return okPressed,text;
+
+    def resizeEvent(self, event):
+        self.resized.emit()
+        return QtGui.QMainWindow.resizeEvent(event)
+
+
 
 
 

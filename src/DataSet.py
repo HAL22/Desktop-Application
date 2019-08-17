@@ -55,6 +55,12 @@ class DataSet():
 
         self.UserAnnotations = []
 
+        ##Axis of the annotations
+
+        self.AxisAnnotation = []
+
+
+
 
 
 
@@ -180,6 +186,14 @@ class DataSet():
     def setUserAnnotation(self,userannotation):
 
         self.UserAnnotations = userannotation
+
+    def getAxisAnnotation(self):
+
+        return self.AxisAnnotation
+
+    def setAxisAnnotation(self,axisannotation):
+
+        self.AxisAnnotation = axisannotation
 
 
 
