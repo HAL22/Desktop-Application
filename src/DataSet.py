@@ -59,6 +59,13 @@ class DataSet():
 
         self.AxisAnnotation = []
 
+        ### Matrix file location ####
+
+        self.Matrixloc = ''
+
+
+
+
 
 
 
@@ -194,6 +201,12 @@ class DataSet():
     def setAxisAnnotation(self,axisannotation):
 
         self.AxisAnnotation = axisannotation
+
+    def getMatrixloc(self):
+        return self.Matrixloc
+
+    def setMatrixloc(self,loc):
+        self.Matrixloc = loc
 
 
 

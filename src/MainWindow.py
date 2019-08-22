@@ -321,6 +321,8 @@ class Ui_MainWindow(object):
 
         self.PeaksandTrough.setEnabled(False)
 
+        QtCore.QCoreApplication.setApplicationName(self.APPLICATION_NAME)
+
 
 
 
@@ -341,7 +343,7 @@ class Ui_MainWindow(object):
 
         self.RadioButtonsArray= [] ## Will store the radio buttons used in the window
 
-        self.numDataSet = 2 ## Number of data sets
+        self.numDataSet = 0 ## Number of data sets
 
         self.triggernames = ['Experience Starts','Pipe Falls','Boat Hits Pipe','Monster crashes through gate','Monster walks \ninfront of player','Monster leaps \nat player','Experience ends']
 
@@ -379,6 +381,21 @@ class Ui_MainWindow(object):
 
         self.AddUserAnnotations = False
 
+        self.FILENAME = []
+
+        ###For saving the project state ####
+
+        self.Saved = False
+        self.APPLICATION_NAME = "New Application"
+        self.APPLICATION_FILEPATH = ''
+        ###
+        self.DATA_LOCTION = "Dataloc"
+        self.ANNOTATIONAXIS = "annAxis"
+        self.YVALUEANNOTATION = "yvalue"
+        self.XVLAUEANNOTATION ="xvalue"
+        self.TEXTANNOTATION = "textann"
+
+
 
 
     def hover(self,event):
@@ -403,6 +420,108 @@ class Ui_MainWindow(object):
 
         self.fig.canvas.draw_idle()
 
+
+    def Save(self):
+
+        if self.Saved == False:
+
+            self.Save_AS()
+
+        else:
+
+            QtCore.QSettings.setPath(QtCore.QSettings.IniFormat, QtCore.QSettings.UserScope, self.APPLICATION_FILEPATH)
+            settings = QtCore.QSettings(self.APPLICATION_NAME + ".ini", QtCore.QSettings.IniFormat)
+
+            settings.setValue(self.DATA_LOCTION, self.FILENAME)
+
+
+
+
+
+
+            settings.sync()
+
+
+    def open_project(self):
+
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow, "Open File")
+
+        settings = QtCore.QSettings(filename,QtCore.QSettings.IniFormat)
+
+        filenamelist =  settings.value(self.DATA_LOCTION,[],'QStringList')
+
+        #annotation = settings.value("XX")
+
+
+
+
+
+
+
+
+        for l in filenamelist:
+
+            if l!='':
+                self.read_data(l)
+
+
+
+
+
+    def Save_AS(self):
+
+        okPressed, text = self.getFilename()
+
+
+        if okPressed and text!='':
+
+            self.APPLICATION_NAME = text
+            QtCore.QCoreApplication.setApplicationName(self.APPLICATION_NAME)
+
+            directory = str(QtWidgets.QFileDialog.getExistingDirectory(MainWindow, "Select Directory"))
+
+            if directory!='':
+
+                self.APPLICATION_FILEPATH = directory
+
+                self.Saved = True
+
+                QtCore.QSettings.setPath(QtCore.QSettings.IniFormat, QtCore.QSettings.UserScope,directory)
+                settings = QtCore.QSettings(self.APPLICATION_NAME+".ini", QtCore.QSettings.IniFormat)
+
+                settings.setValue(self.DATA_LOCTION,self.FILENAME)
+
+
+
+
+
+                settings.sync()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        print()
+
+
+
+
     def getChannelDescription(self,axis):
 
         if axis == self.ax1EDA:
@@ -423,9 +542,9 @@ class Ui_MainWindow(object):
         self.HOVER = False
         plt.clf()
 
-        plt.tight_layout()
 
-        self.fig.subplots_adjust(right=0.70)
+
+        self.fig.subplots_adjust(right=0.75)
 
         self.subPlot = plt.subplot(1,1,1)
 
@@ -1022,6 +1141,31 @@ class Ui_MainWindow(object):
 
 
 
+                if self.LINES != [] and self.Channellabels != []:
+                    plt.legend(self.LINES, self.Channellabels)
+
+
+                if self.ActivateTriggers.isChecked()==True:
+
+                    self.triggersAndLines = self.LINES + self.triggerLegend
+
+                    self.labels = self.Channellabels + self.triggernames
+
+                    plt.legend(self.triggersAndLines,self.labels)
+
+
+
+
+
+
+
+
+                plt.tight_layout()
+
+
+
+
+
                 self.refresh()
 
 
@@ -1077,13 +1221,23 @@ class Ui_MainWindow(object):
 
         self.Line_Graphs_Overlayed.toggled.connect(lambda: self.renderLineGraphs(self.CurrentDataSet))
 
-        self.CorrelationMatrix.toggled.connect(self.getCorrelationMatrix)
+        self.CorrelationMatrix.toggled.connect(self.actionCorrelationMatrix)
 
         self.actionAdd_Data.triggered.connect(self.file_open)
+        self.actionSave_As.triggered.connect(self.Save_AS)
+        self.actionSave.triggered.connect(self.Save)
+        self.actionOpen_Project.triggered.connect(self.open_project)
 
         self.ActivateTriggers.stateChanged.connect(self.actionTrigger)
 
         self.PeaksandTrough.stateChanged.connect(self.actionPeakandTrough)
+
+
+    def actionCorrelationMatrix(self):
+
+        self.matrixdataloc = self.CurrentDataSet.getMatrixloc()
+
+        self.getCorrelationMatrix()
 
 
     def dataSetAction(self,dataSet):
@@ -1130,6 +1284,8 @@ class Ui_MainWindow(object):
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow, "Open File")
 
         if(filename != ''):
+
+            self.FILENAME.append(filename)
             self.read_data(filename)
 
     def read_data(self, filename):
@@ -1162,11 +1318,11 @@ class Ui_MainWindow(object):
                 if i == 4 and j!=0:
                     ecg.append(sheet.cell_value(j, i))
 
-        self.createButton(eda, ecg, rsp, ppg, time)
+        self.createButton(eda, ecg, rsp, ppg, time,filename)
 
-        self.matrixdataloc = filename
 
-    def createButton(self, eda, ecg, rsp, ppg, time):
+
+    def createButton(self, eda, ecg, rsp, ppg, time,filename):
 
         _translate = QtCore.QCoreApplication.translate
         name = "DataSet" + str(self.numDataSet + 1)
@@ -1181,6 +1337,8 @@ class Ui_MainWindow(object):
 
         dataset = DataSet(time, eda, ecg, rsp, ppg, radiobutton)
         radiobutton.toggled.connect(lambda: self.dataSetAction(dataset))
+
+        dataset.setMatrixloc(filename)
 
         self.RadioButtonsArray.append(radiobutton)
         self.dataSetArray.append(dataset)
@@ -1248,12 +1406,17 @@ class Ui_MainWindow(object):
 
         triggers = dataSet.getTriggers()
 
+        self.triggercolors = ['maroon','sienna','darkgreen','deeppink','black']
+
         yvalue = 0
 
         self.triggernames = ['Experience Starts','Pipe Falls','Boat Hits Pipe','Monster crashes through gate','Monster walks \ninfront of player','Monster leaps \nat player','Experience ends']
 
 
-        self.triggerAxis = self.subPlot
+        """""""""
+
+
+        self.triggerAxis = self.ax1EDA
         self.triggerAxis.xaxis.set_ticks_position("bottom")
         self.triggerAxis.xaxis.set_label_position("bottom")
         self.triggerAxis.spines["bottom"].set_position(("axes", -0.15))
@@ -1265,15 +1428,26 @@ class Ui_MainWindow(object):
 
 
 
-        self.triggerAxis.set_xlim(self.subPlot.get_xlim())
+        self.triggerAxis.set_xlim(self.ax1EDA.get_xlim())
         self.triggerAxis.set_xticks(dataSet.getTriggers())
         self.triggerAxis.set_xticklabels(self.triggernames)
+        
+        
+        """
+
+        self.lineStyles = ['-','--','-.',':','-']
+
+        self.triggerLegend = []
 
 
 
-        for x in triggers:
+        for x,n,l,c in zip(triggers,self.triggernames,self.lineStyles,self.triggercolors):
 
-            self.subPlot.axvline(x, linestyle='dashed', alpha=0.5, color = 'black')
+          line=  plt.axvline(x, linestyle=l, alpha=0.5, color = c,label=n)
+
+          self.triggerLegend.append(line)
+
+
 
         self.refresh()
 
@@ -1720,12 +1894,12 @@ class Ui_MainWindow(object):
 
         for annot,axis in zip(self.CurrentDataSet.getUserAnnotation(),self.CurrentDataSet.getAxisAnnotation()):
 
-            ann = self.subPlot.annotate("", xy=(0, 0), xytext=(0, 0), textcoords="offset points",
+            ann = self.subPlot.annotate("", xy=(0, 0), xytext=(5, 5), textcoords="offset points",
                                           bbox=dict(boxstyle="round", fc="w", alpha=0.4),
                                           arrowprops=dict(arrowstyle="->"))
 
 
-
+            yvalue = 0.1
 
 
 
@@ -1763,6 +1937,14 @@ class Ui_MainWindow(object):
         text, okPressed = QInputDialog.getText(self.centralwidget, "Annotation", "Enter text:", QLineEdit.Normal, "")
 
         return okPressed,text;
+
+    def getFilename(self):
+
+        text, okPressed = QInputDialog.getText(self.centralwidget, "File name", "Enter File name:", QLineEdit.Normal, "")
+
+        return okPressed, text;
+
+
 
     def resizeEvent(self, event):
         self.resized.emit()
