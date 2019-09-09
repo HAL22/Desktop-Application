@@ -275,12 +275,16 @@ class Ui_MainWindow(object):
         self.Line_Graphs_Overlayed.setText(_translate("MainWindow", "Line Graphs(overlayed)"))
         self.CorrelationMatrix.setText(_translate("MainWindow", "Correlation Matrix"))
         self.ActivateTriggers.setText(_translate("MainWindow", "Activate Triggers"))
-        self.PeaksandTrough.setText(_translate("MainWindow", "Show Peaks and Troughd"))
+        self.PeaksandTrough.setText(_translate("MainWindow", "Show Peaks and Troughs"))
         self.ChannelLabel.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600;\">Channels</span></p></body></html>"))
         self.EDA.setText(_translate("MainWindow", "EDA"))
         self.ECG.setText(_translate("MainWindow", "ECG"))
         self.RSP.setText(_translate("MainWindow", "RSP"))
         self.PPG.setText(_translate("MainWindow", "PPG"))
+        self.EDA.setToolTip("Electrodermal activity is the property of the human body \nthat causes continuous variation in\n the electrical characteristics of the skin.")
+        self.ECG.setToolTip("Electrocardiography is the process of producing an electrocardiogram,\n a recording – a graph of voltage versus time – of the electrical activity of the\n heart using electrodes placed on the skin")
+        self.RSP.setToolTip("Respiration")
+        self.PPG.setToolTip("Photoplethysmography (PPG) is a simple and low-cost optical technique that\n can be used to detect blood volume \nchanges in the microvascular bed of tissue.")
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuInsert.setTitle(_translate("MainWindow", "Insert"))
         self.menuWindow.setTitle(_translate("MainWindow", "Window"))
@@ -312,6 +316,11 @@ class Ui_MainWindow(object):
         self.ECG.setEnabled(False)
         self.PPG.setEnabled(False)
         self.RSP.setEnabled(False)
+
+        self.Line_Graphs_Overlayed.setChecked(False)
+        self.CorrelationMatrix.setChecked(False)
+        self.ActivateTriggers.setChecked(False)
+        self.PeaksandTrough.setChecked(False)
 
 
         self.Line_Graphs_Overlayed.setEnabled(False)
@@ -383,6 +392,8 @@ class Ui_MainWindow(object):
 
         self.FILENAME = []
 
+        self.TRIGGERFILENAME = []
+
         ###For saving the project state ####
 
         self.Saved = False
@@ -390,10 +401,167 @@ class Ui_MainWindow(object):
         self.APPLICATION_FILEPATH = ''
         ###
         self.DATA_LOCTION = "Dataloc"
-        self.ANNOTATIONAXIS = "annAxis"
-        self.YVALUEANNOTATION = "yvalue"
-        self.XVLAUEANNOTATION ="xvalue"
-        self.TEXTANNOTATION = "textann"
+        self.TRIGGER_LOCTION = "Triggerloc"
+        self.ANNOTATION_POS = "Annotation"
+        self.AXIS_ANN = "AxisAnnotation"
+
+
+        self.ActiveMatrix = False
+
+        self.StatedChanged = False
+
+        self.EDA.setEnabled(False)
+        self.ECG.setEnabled(False)
+        self.PPG.setEnabled(False)
+        self.RSP.setEnabled(False)
+
+        self.Line_Graphs_Overlayed.setEnabled(False)
+        self.CorrelationMatrix.setEnabled(False)
+
+        self.ActivateTriggers.setEnabled(False)
+
+        self.PeaksandTrough.setEnabled(False)
+
+        QtCore.QCoreApplication.setApplicationName(self.APPLICATION_NAME)
+
+
+        self.AnnotationMoved = None
+
+        self.PressedData = None
+
+
+
+
+    def removeAndResetData(self):
+
+        self.dataSetArray.clear()
+
+        for radiobutton in self.RadioButtonsArray:
+
+            self.verticalLayout_3.removeWidget(radiobutton)
+
+            radiobutton.deleteLater()
+
+            radiobutton = None
+
+
+
+
+
+        self.resetData()
+
+        self.refresh()
+
+
+
+
+    def resetData(self):
+
+        self.dataSetArray.clear()
+
+        self.RadioButtonsArray.clear()  ## Will store the radio buttons used in the window
+
+        self.numDataSet = 0  ## Number of data sets
+
+        self.triggernames = ['Experience Starts', 'Pipe Falls', 'Boat Hits Pipe', 'Monster crashes through gate',
+                             'Monster walks \ninfront of player', 'Monster leaps \nat player', 'Experience ends']
+
+        self.CurrentDataSet = None  ## Current dataset
+
+        ## For the tooltip on the plot array
+        self.ANNOTS = []
+        self.LINE_DIC = []
+        self.ANNOTS_DIC = []
+        self.AXISET = []
+        self.LINES = []
+        self.Channellabels = []
+
+        self.HOVER = False  ## Activate tooltip
+
+        self.ax1EDA = None
+        self.ax2ECG = None
+        self.ax3PPG = None
+        self.ax4RSP = None
+
+
+        self.MainChannel = None
+
+        self.MainChannelMin = None
+
+        self.MainChannelMax = None
+
+        self.numActiveChannels = 0
+
+        self.ActiveTriggers = False
+
+        self.ActivePeakandTrough = False
+
+        self.matrixdataloc = ""
+
+        self.AddUserAnnotations = False
+
+        self.FILENAME = []
+
+        self.TRIGGERFILENAME = []
+
+        ###For saving the project state ####
+
+        self.Saved = False
+        self.APPLICATION_NAME = "New Application"
+        self.APPLICATION_FILEPATH = ''
+        self.APPLICATION_FULLPATH = ''
+
+
+        ###
+        self.DATA_LOCTION = "Dataloc"
+        self.TRIGGER_LOCTION = "Triggerloc"
+        self.ANNOTATION_POS = "Annotation"
+        self.AXIS_ANN = "AxisAnnotation"
+
+        self.ActiveMatrix = False
+
+        self.StatedChanged = False
+
+
+        self.Line_Graphs_Overlayed.setChecked(False)
+        self.CorrelationMatrix.setChecked(False)
+        self.ActivateTriggers.setChecked(False)
+        self.PeaksandTrough.setChecked(False)
+
+        self.Line_Graphs_Overlayed.setEnabled(False)
+        self.CorrelationMatrix.setEnabled(False)
+        self.ActivateTriggers.setEnabled(False)
+        self.PeaksandTrough.setEnabled(False)
+
+        self.EDA.setChecked(False)
+        self.ECG.setChecked(False)
+        self.RSP.setChecked(False)
+        self.PPG.setChecked(False)
+
+        self.EDA.setEnabled(False)
+        self.ECG.setEnabled(False)
+        self.PPG.setEnabled(False)
+        self.RSP.setEnabled(False)
+
+
+
+    def exit_application(self):
+
+        if self.StatedChanged == True:
+
+            if self.Saved == False:
+
+                self.Save_AS()
+                QtCore.QCoreApplication.quit()
+
+            else:
+
+                self.Save()
+                QtCore.QCoreApplication.quit()
+
+        else:
+
+            QtCore.QCoreApplication.quit()
 
 
 
@@ -429,43 +597,194 @@ class Ui_MainWindow(object):
 
         else:
 
-            QtCore.QSettings.setPath(QtCore.QSettings.IniFormat, QtCore.QSettings.UserScope, self.APPLICATION_FILEPATH)
-            settings = QtCore.QSettings(self.APPLICATION_NAME + ".ini", QtCore.QSettings.IniFormat)
+            #QtCore.QSettings.setPath(QtCore.QSettings.IniFormat, QtCore.QSettings.UserScope, self.APPLICATION_FILEPATH)
+            settings = QtCore.QSettings(self.APPLICATION_FULLPATH, QtCore.QSettings.IniFormat)
+
+            annot = []
+            axis = []
+
+            for dataset in self.dataSetArray:
+                annot.append(dataset.getUserAnnotation())
+                axis.append(dataset.getAxisAnnotation())
+
+
 
             settings.setValue(self.DATA_LOCTION, self.FILENAME)
 
+            settings.setValue(self.TRIGGER_LOCTION, self.TRIGGERFILENAME)
 
+            settings.setValue(self.ANNOTATION_POS, annot)
 
-
+            settings.setValue(self.AXIS_ANN, axis)
 
 
             settings.sync()
 
+            self.StatedChanged = False
+
+
+    def new_project(self):
+
+        if self.StatedChanged == True:
+
+            self.StatedChanged = False
+
+            if self.Saved == False:
+
+                self.Save_AS()
+
+                self.removeAndResetData()
+
+                self.Saved = False
+
+            else:
+
+                self.Save()
+
+                self.removeAndResetData()
+
+                self.Saved = False
+
+
+
+        else:
+
+            self.Saved = False
+
+            self.removeAndResetData()
+
+
+
+
 
     def open_project(self):
 
-        filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow, "Open File")
-
-        settings = QtCore.QSettings(filename,QtCore.QSettings.IniFormat)
-
-        filenamelist =  settings.value(self.DATA_LOCTION,[],'QStringList')
-
-        #annotation = settings.value("XX")
 
 
+        if self.StatedChanged == True:
+
+            if self.Saved == False:
+
+                self.Save_AS()
+
+                self.removeAndResetData()
+
+                filter = "ini(*.ini)"
+
+                filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow, "Open File","",filter)
+
+                self.APPLICATION_FULLPATH = filename
+
+                settings = QtCore.QSettings(self.APPLICATION_FULLPATH, QtCore.QSettings.IniFormat)
+
+                filenamelist = settings.value(self.DATA_LOCTION, [], 'QStringList')
+
+                trigger_filename = settings.value(self.TRIGGER_LOCTION, [], 'QStringList')
+
+                self.FILENAME = filenamelist
+                self.TRIGGERFILENAME = trigger_filename
 
 
 
+                ann = settings.value(self.ANNOTATION_POS)
+
+                axis_ann = settings.value(self.AXIS_ANN)
+
+                for l, t in zip(filenamelist, trigger_filename):
+
+                    if l != '' and t != '':
+                        self.read_data(l, t)
 
 
 
-        for l in filenamelist:
+                for j in range(len(ann)):
 
-            if l!='':
-                self.read_data(l)
+                    self.dataSetArray[j].setUserAnnotation(ann[j])
+
+                    self.dataSetArray[j].setAxisAnnotation(axis_ann[j])
+
+
+                self.Saved = True
 
 
 
+            else:
+
+                self.Save()
+
+                self.removeAndResetData()
+
+                filter = "ini(*.ini)"
+
+                filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow, "Open File", "", filter)
+
+                self.APPLICATION_FULLPATH = filename
+
+                settings = QtCore.QSettings(self.APPLICATION_FULLPATH, QtCore.QSettings.IniFormat)
+
+                filenamelist = settings.value(self.DATA_LOCTION, [], 'QStringList')
+
+                trigger_filename = settings.value(self.TRIGGER_LOCTION, [], 'QStringList')
+
+                self.FILENAME = filenamelist
+                self.TRIGGERFILENAME = trigger_filename
+
+                ann = settings.value(self.ANNOTATION_POS)
+
+                axis_ann = settings.value(self.AXIS_ANN)
+
+                for l, t in zip(filenamelist, trigger_filename):
+
+                    if l != '' and t != '':
+                        self.read_data(l, t)
+
+                for i in range(len(self.dataSetArray)):
+                    self.dataSetArray[i].setUserAnnotation(ann[i])
+
+                    self.dataSetArray[i].setAxisAnnotation(axis_ann[i])
+
+
+                self.Saved = True
+
+
+        else:
+
+            self.removeAndResetData()
+
+            filter = "ini(*.ini)"
+
+            filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow, "Open File", "", filter)
+
+
+            self.APPLICATION_FULLPATH = filename
+
+            settings = QtCore.QSettings(self.APPLICATION_FULLPATH, QtCore.QSettings.IniFormat)
+
+            filenamelist = settings.value(self.DATA_LOCTION, [], 'QStringList')
+
+            trigger_filename = settings.value(self.TRIGGER_LOCTION, [], 'QStringList')
+
+            self.FILENAME = filenamelist
+            self.TRIGGERFILENAME = trigger_filename
+
+            ann = settings.value(self.ANNOTATION_POS)
+
+            axis_ann = settings.value(self.AXIS_ANN)
+
+            for l, t in zip(filenamelist, trigger_filename):
+
+                if l != '' and t != '':
+                    self.read_data(l, t)
+
+            for i in range(len(self.dataSetArray)):
+                self.dataSetArray[i].setUserAnnotation(ann[i])
+
+                self.dataSetArray[i].setAxisAnnotation(axis_ann[i])
+
+            self.Saved = True
+
+
+        self.refresh()
 
 
     def Save_AS(self):
@@ -475,7 +794,7 @@ class Ui_MainWindow(object):
 
         if okPressed and text!='':
 
-            self.APPLICATION_NAME = text
+            self.APPLICATION_NAME = text+".ini"
             QtCore.QCoreApplication.setApplicationName(self.APPLICATION_NAME)
 
             directory = str(QtWidgets.QFileDialog.getExistingDirectory(MainWindow, "Select Directory"))
@@ -483,42 +802,38 @@ class Ui_MainWindow(object):
             if directory!='':
 
                 self.APPLICATION_FILEPATH = directory
+                annot = []
+                axis = []
 
                 self.Saved = True
 
-                QtCore.QSettings.setPath(QtCore.QSettings.IniFormat, QtCore.QSettings.UserScope,directory)
-                settings = QtCore.QSettings(self.APPLICATION_NAME+".ini", QtCore.QSettings.IniFormat)
+
+                for dataset in self.dataSetArray:
+
+                    annot.append(dataset.getUserAnnotation())
+                    axis.append(dataset.getAxisAnnotation())
+
+
+
+
+
+                print(directory)
+
+                self.APPLICATION_FULLPATH = directory+"/"+self.APPLICATION_NAME
+               # QtCore.QSettings.setPath(QtCore.QSettings.IniFormat, QtCore.QSettings.SystemScope,directory)
+                settings = QtCore.QSettings(self.APPLICATION_FILEPATH, QtCore.QSettings.IniFormat)
 
                 settings.setValue(self.DATA_LOCTION,self.FILENAME)
 
+                settings.setValue(self.TRIGGER_LOCTION,self.TRIGGERFILENAME)
 
+                settings.setValue(self.ANNOTATION_POS,annot)
 
-
+                settings.setValue(self.AXIS_ANN,axis)
 
                 settings.sync()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        print()
-
+                self.StatedChanged = False
 
 
 
@@ -559,19 +874,11 @@ class Ui_MainWindow(object):
             self.ECG.setEnabled(True)
             self.PPG.setEnabled(True)
             self.RSP.setEnabled(True)
-
             self.ActivateTriggers.setEnabled(True)
-
-
+            self.PeaksandTrough.setEnabled(True)
 
             plt.title('Physiological data', fontsize=10)
             plt.xlabel('Time in microsecond', fontsize=10)
-
-
-
-
-
-
 
             self.InitLinePlotData()
 
@@ -579,11 +886,6 @@ class Ui_MainWindow(object):
 
 
                 self.HOVER=True
-
-
-
-
-
 
 
                 if self.EDA.isChecked() == True:
@@ -849,16 +1151,22 @@ class Ui_MainWindow(object):
 
                         self.MainChannel = "PPG"
                         self.ax3PPG = self.subPlot
+                       # self.subPlot.set_ybound(0, 1)
                         self.LinePPG, = self.subPlot.plot(np.array(dataSet.getTime()), np.array(dataSet.getNormPPG()),
                                                           color="purple")
 
                         self.subPlot.set_ylabel("PPG")
                         if (min(dataSet.getNormPPG()) == 0 and max(dataSet.getNormPPG()) == 0):
                             self.ax3PPG.set_ylim(0, 1)
+                          #  self.LinePPG.yaxis = [0, 1]
 
                         else:
 
-                            self.ax3PPG.set_ylim(min(dataSet.getNormPPG()), max(dataSet.getNormPPG()))
+                            self.ax3PPG.set_ylim([min(dataSet.getNormPPG()), max(dataSet.getNormPPG())])
+
+
+
+
                         self.LinePPG.set_label('PPG')
                         self.LINES.append(self.LinePPG)
                         self.AXISET.append(self.ax3PPG)
@@ -1105,7 +1413,7 @@ class Ui_MainWindow(object):
                     plt.legend(self.LINES, self.Channellabels)
 
                 for ax in self.AXISET:
-                    annot = self.subPlot.annotate("", xy=(0, 0), xytext=(0, 0), textcoords="offset points",
+                    annot = self.subPlot.annotate("", xy=(0, 0), xytext=(-10, 10), textcoords="offset points",
                                                   bbox=dict(boxstyle="round", fc="w", alpha=0.4),
                                                   arrowprops=dict(arrowstyle="->"))
                     annot.set_visible(False)
@@ -1156,10 +1464,6 @@ class Ui_MainWindow(object):
 
 
 
-
-
-
-
                 plt.tight_layout()
 
 
@@ -1172,6 +1476,13 @@ class Ui_MainWindow(object):
 
 
         else:
+
+            self.EDA.setChecked(False)
+            self.ECG.setChecked(False)
+            self.RSP.setChecked(False)
+            self.PPG.setChecked(False)
+            self.ActivateTriggers.setChecked(False)
+
             self.EDA.setEnabled(False)
             self.ECG.setEnabled(False)
             self.PPG.setEnabled(False)
@@ -1227,26 +1538,71 @@ class Ui_MainWindow(object):
         self.actionSave_As.triggered.connect(self.Save_AS)
         self.actionSave.triggered.connect(self.Save)
         self.actionOpen_Project.triggered.connect(self.open_project)
+        self.actionExit_Application.triggered.connect(self.exit_application)
+
+        self.actionNew_Project.triggered.connect(self.new_project)
 
         self.ActivateTriggers.stateChanged.connect(self.actionTrigger)
 
         self.PeaksandTrough.stateChanged.connect(self.actionPeakandTrough)
 
 
+
+
     def actionCorrelationMatrix(self):
 
-        self.matrixdataloc = self.CurrentDataSet.getMatrixloc()
 
-        self.getCorrelationMatrix()
+        if self.CorrelationMatrix.isChecked()==True:
+
+            self.EDA.setEnabled(False)
+            self.ECG.setEnabled(False)
+            self.PPG.setEnabled(False)
+            self.RSP.setEnabled(False)
+            self.ActivateTriggers.setEnabled(False)
+            self.PeaksandTrough.setEnabled(False)
+
+            self.matrixdataloc = self.CurrentDataSet.getMatrixloc()
+
+            self.getCorrelationMatrix()
+
+        else:
+
+            self.EDA.setEnabled(True)
+            self.ECG.setEnabled(True)
+            self.PPG.setEnabled(True)
+            self.RSP.setEnabled(True)
+            self.PeaksandTrough.setEnabled(True)
 
 
-    def dataSetAction(self,dataSet):
 
-        self.CurrentDataSet = dataSet
+    def dataSetAction(self,dataSet,radiobutton):
 
-        self.CorrelationMatrix.setEnabled(True)
-        self.Line_Graphs_Overlayed.setEnabled(True)
-        self.PeaksandTrough.setEnabled(True)
+
+        if radiobutton.isChecked()==True:
+
+            self.CurrentDataSet = dataSet
+
+            self.CorrelationMatrix.setEnabled(True)
+            self.Line_Graphs_Overlayed.setEnabled(True)
+            self.PeaksandTrough.setEnabled(True)
+
+        else:
+
+            self.CurrentDataSet = None
+            self.renderLineGraphs(self.CurrentDataSet)
+            self.Line_Graphs_Overlayed.setChecked(False)
+            self.CorrelationMatrix.setChecked(False)
+            self.ActivateTriggers.setChecked(False)
+            self.PeaksandTrough.setChecked(False)
+            self.CorrelationMatrix.setEnabled(False)
+            self.Line_Graphs_Overlayed.setEnabled(False)
+            self.PeaksandTrough.setEnabled(False)
+            self.ActivateTriggers.setEnabled(False)
+            self.refresh()
+
+
+
+
 
 
     def InitLinePlotData(self):
@@ -1281,67 +1637,314 @@ class Ui_MainWindow(object):
 
     def file_open(self):
 
-        filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow, "Open File")
+        filter ="xlsx(*.xlsx)"
 
-        if(filename != ''):
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(MainWindow,"Open File","",filter)
+
+        filename_trigger, _= QtWidgets.QFileDialog.getOpenFileName(MainWindow,"Open Trigger File","",filter)
+
+        if(filename != '' and filename_trigger != ''):
 
             self.FILENAME.append(filename)
-            self.read_data(filename)
+            self.TRIGGERFILENAME.append(filename_trigger)
+            self.read_data(filename,filename_trigger)
 
-    def read_data(self, filename):
+        else:
 
-        eda = []
-        ecg = []
-        rsp = []
-        ppg = []
+            self.get_error_message("Please select files containing data and trigger data ")
 
-        time = []
+
+    def get_error_message(self,text):
+
+        msg = QtWidgets.QMessageBox(self.centralwidget)
+
+        msg.setIcon(QtWidgets.QMessageBox.Critical)
+
+        msg.setText("This is an Error message")
+
+        msg.setInformativeText("See error below")
+
+        msg.setWindowTitle("ERROR")
+
+        msg.setDetailedText("The details are as follows:\n"+text)
+
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+
+        msg.exec_()
+
+
+
+
+
+
+
+
+    def read_triggerdata(self,filename):
+
+        try:
+
+
+
+            wb = xlrd.open_workbook(filename)
+
+            trigger_list = []
+
+            error = "No Error"
+
+            sheet = wb.sheet_by_index(0)
+            format = True
+
+
+            self.triggernames.clear()
+
+
+
+            if sheet.nrows!=2:
+                self.get_error_message("Excel File containing the triggers should only have two rows")
+
+            else:
+
+                for i in range(sheet.ncols):
+                    for j in range(sheet.nrows):
+
+
+                        if j==0:
+
+                            if isinstance(sheet.cell_value(j, i), str) == False:
+                                error = "Row 0 must have only labels(triggers)"
+                                format = False
+
+                                break
+
+                            self.triggernames.append(sheet.cell_value(j, i))
+
+
+
+                        if j != 0:
+
+                            if isinstance(sheet.cell_value(j, i), float) == False:
+
+                                error = "Cell values must be float ( Trigger)"
+
+                                format = False
+
+                                break
+
+                            trigger_list.append(sheet.cell_value(j, i))
+
+                    if format==False:
+                        break
+
+                if format==False:
+
+
+
+                    self.get_error_message(error)
+
+                    return format,trigger_list
+
+                else:
+
+
+
+                    return format,trigger_list
+
+
+
+        except:
+
+            self.get_error_message("Error will loading the trigger data, check data format")
+
+
+
+    def read_data(self, filename,filename_triggers):
+
+
+        try:
+            dataformat = True
+
+            general_error = "Error will loading the physiological data, check data format"
+
+            data_error = "Error will loading the physiological data, cell values are incorrect"
+
+            eda = []
+            ecg = []
+            rsp = []
+            ppg = []
+
+            time = []
+
+            wb = xlrd.open_workbook(filename)
+            sheet = wb.sheet_by_index(0)
+
+
+            physiological_format,phys_error = self.check_physdata_format(filename)
+
+            if physiological_format==False:
+
+                self.get_error_message(phys_error)
+
+            else:
+
+                for i in range(sheet.ncols):
+                    for j in range(sheet.nrows):
+
+                        if i == 0 and j != 0:
+
+                            if isinstance(sheet.cell_value(j, i), float) == False:
+                                dataformat = False
+                                break
+
+                            time.append(sheet.cell_value(j, i))
+
+                        if i == 1 and j != 0:
+
+                            if isinstance(sheet.cell_value(j, i), float) == False:
+                                dataformat = False
+                                break
+
+                            ppg.append(sheet.cell_value(j, i))
+
+                        if i == 2 and j != 0:
+
+                            if isinstance(sheet.cell_value(j, i), float) == False:
+                                dataformat = False
+                                break
+
+                            rsp.append(sheet.cell_value(j, i))
+
+                        if i == 3 and j != 0:
+
+                            if isinstance(sheet.cell_value(j, i), float) == False:
+                                dataformat = False
+                                break
+
+                            eda.append(sheet.cell_value(j, i))
+
+                        if i == 4 and j != 0:
+
+                            if isinstance(sheet.cell_value(j, i), float) == False:
+                                dataformat = False
+                                break
+
+                            ecg.append(sheet.cell_value(j, i))
+
+                    if dataformat == False:
+                        break
+
+                if dataformat == True:
+
+                    self.createButton(eda, ecg, rsp, ppg, time, filename, filename_triggers)
+
+                else:
+
+                    self.get_error_message(data_error)
+
+
+
+        except:
+
+            self.get_error_message(general_error)
+
+
+
+    def check_min_rows(self,filename):
 
         wb = xlrd.open_workbook(filename)
         sheet = wb.sheet_by_index(0)
 
-        for i in range(sheet.ncols):
-            for j in range(sheet.nrows):
+        if sheet.nrows >1:
 
-                if i == 0 and j!=0:
-                    time.append(sheet.cell_value(j, i))
+            return True, "No Error"
 
-                if i == 1 and j!=0:
-                    ppg.append(sheet.cell_value(j, i))
+        else:
 
-                if i == 2 and j!=0:
-                    rsp.append(sheet.cell_value(j, i))
-
-                if i == 3 and j!=0:
-                    eda.append(sheet.cell_value(j, i))
-
-                if i == 4 and j!=0:
-                    ecg.append(sheet.cell_value(j, i))
-
-        self.createButton(eda, ecg, rsp, ppg, time,filename)
+            return False, "Minimum number of rows should be 2"
 
 
+    def check_physdata_format(self,filename):
 
-    def createButton(self, eda, ecg, rsp, ppg, time,filename):
 
-        _translate = QtCore.QCoreApplication.translate
-        name = "DataSet" + str(self.numDataSet + 1)
-        self.numDataSet = self.numDataSet + 1;
+        format,error = self.check_min_rows(filename)
 
-        radiobutton = QtWidgets.QRadioButton(self.left_left_scrollarea_widget)
-        radiobutton.setObjectName(name)
-        radiobutton.setText(_translate("MainWindow", name))
-        self.verticalLayout_3.addWidget(radiobutton)
+        wb = xlrd.open_workbook(filename)
+        sheet = wb.sheet_by_index(0)
 
-        self.verticalLayout_3.addWidget(self.LineBreakerDataSet, 0, QtCore.Qt.AlignBottom)
 
-        dataset = DataSet(time, eda, ecg, rsp, ppg, radiobutton)
-        radiobutton.toggled.connect(lambda: self.dataSetAction(dataset))
+        if format==False:
 
-        dataset.setMatrixloc(filename)
 
-        self.RadioButtonsArray.append(radiobutton)
-        self.dataSetArray.append(dataset)
+            return format,error
+
+
+        if sheet.cell_value(0,0)!= "Time":
+
+
+
+            return False,"Time should be in (0,0)"
+
+
+        elif sheet.cell_value(0,1)!="PPG":
+
+            return False, "PPG should be in (0,1)"
+
+        elif sheet.cell_value(0,2)!="RSP":
+
+            return False, "RSP should be in (0,2)"
+
+        elif sheet.cell_value(0,3)!="EDA":
+
+            return False, "EDA should be in (0,3)"
+
+        elif sheet.cell_value(0,4)!="ECG":
+
+            return False, "ECG should be in (0,4)"
+
+        else:
+
+            return True, "No error"
+
+
+
+
+    def createButton(self, eda, ecg, rsp, ppg, time,filename,filename_triggers):
+
+        format_trigger, trigger  = self.read_triggerdata(filename_triggers)
+
+
+        if format_trigger==True:
+
+            _translate = QtCore.QCoreApplication.translate
+            name = "DataSet" + str(self.numDataSet + 1)
+            self.numDataSet = self.numDataSet + 1;
+
+            radiobutton = QtWidgets.QRadioButton(self.left_left_scrollarea_widget)
+            radiobutton.setObjectName(name)
+            radiobutton.setText(_translate("MainWindow", name))
+            self.verticalLayout_3.addWidget(radiobutton)
+
+
+
+            self.verticalLayout_3.addWidget(self.LineBreakerDataSet, 0, QtCore.Qt.AlignBottom)
+
+            dataset = DataSet(time, eda, ecg, rsp, ppg, radiobutton)
+            radiobutton.toggled.connect(lambda: self.dataSetAction(dataset, radiobutton))
+
+            dataset.setMatrixloc(filename)
+
+            dataset.setTriggers(trigger)
+
+            self.RadioButtonsArray.append(radiobutton)
+            self.dataSetArray.append(dataset)
+
+            self.StatedChanged = True
+
+
+
+
+
+
+
 
 
 
@@ -1545,6 +2148,140 @@ class Ui_MainWindow(object):
             self.renderLineGraphs(self.CurrentDataSet)
 
 
+
+
+
+
+    def mapCurrentY(self, ydata):
+
+        if self.MainChannel == "EDA":
+
+            self.CurrentDataSet.getAxisAnnotation().append(self.CurrentDataSet.getNormEDA())
+
+            if self.Channellabels[-1] == "ECG":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormEDA()),
+                                      max(self.CurrentDataSet.getNormEDA()), min(self.CurrentDataSet.getNormECG()),
+                                      max(self.CurrentDataSet.getNormECG()),
+                                      ydata)
+
+            elif self.Channellabels[-1] == "PPG":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormEDA()),
+                                      max(self.CurrentDataSet.getNormEDA()), min(self.CurrentDataSet.getNormPPG()),
+                                      max(self.CurrentDataSet.getNormPPG()),
+                                      ydata)
+
+            elif self.Channellabels[-1] == "RSP":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormEDA()),
+                                      max(self.CurrentDataSet.getNormEDA()), min(self.CurrentDataSet.getNormRSP()),
+                                      max(self.CurrentDataSet.getNormRSP()),
+                                      ydata)
+
+            else:
+
+                yvalue = ydata
+
+
+        elif self.MainChannel == "ECG":
+
+            self.CurrentDataSet.getAxisAnnotation().append(self.CurrentDataSet.getNormECG())
+
+            if self.Channellabels[-1] == "EDA":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormECG()),
+                                      max(self.CurrentDataSet.getNormECG()), min(self.CurrentDataSet.getNormEDA()),
+                                      max(self.CurrentDataSet.getNormEDA()),
+                                      ydata)
+
+            elif self.Channellabels[-1] == "PPG":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormECG()),
+                                      max(self.CurrentDataSet.getNormECG()), min(self.CurrentDataSet.getNormPPG()),
+                                      max(self.CurrentDataSet.getNormPPG()),
+                                      ydata)
+
+            elif self.Channellabels[-1] == "RSP":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormECG()),
+                                      max(self.CurrentDataSet.getNormECG()), min(self.CurrentDataSet.getNormRSP()),
+                                      max(self.CurrentDataSet.getNormRSP()),
+                                      ydata)
+
+            else:
+
+                yvalue = ydata
+
+
+        elif self.MainChannel == "PPG":
+
+            self.CurrentDataSet.getAxisAnnotation().append(self.CurrentDataSet.getNormPPG())
+
+            if self.Channellabels[-1] == "EDA":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormPPG()),
+                                      max(self.CurrentDataSet.getNormPPG()),
+                                      min(self.CurrentDataSet.getNormEDA()),
+                                      max(self.CurrentDataSet.getNormEDA()),
+                                      ydata)
+
+            elif self.Channellabels[-1] == "ECG":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormPPG()),
+                                      max(self.CurrentDataSet.getNormPPG()),
+                                      min(self.CurrentDataSet.getNormECG()),
+                                      max(self.CurrentDataSet.getNormECG()),
+                                      ydata)
+
+            elif self.Channellabels[-1] == "RSP":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormPPG()),
+                                      max(self.CurrentDataSet.getNormPPG()),
+                                      min(self.CurrentDataSet.getNormRSP()),
+                                      max(self.CurrentDataSet.getNormRSP()),
+                                      ydata)
+
+            else:
+
+                yvalue = ydata
+
+
+
+        elif self.MainChannel == "RSP":
+
+            self.CurrentDataSet.getAxisAnnotation().append(self.CurrentDataSet.getNormRSP())
+
+            if self.Channellabels[-1] == "EDA":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormRSP()),
+                                      max(self.CurrentDataSet.getNormRSP()),
+                                      min(self.CurrentDataSet.getNormEDA()),
+                                      max(self.CurrentDataSet.getNormEDA()),
+                                      ydata)
+
+            elif self.Channellabels[-1] == "ECG":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormRSP()),
+                                      max(self.CurrentDataSet.getNormRSP()),
+                                      min(self.CurrentDataSet.getNormECG()),
+                                      max(self.CurrentDataSet.getNormECG()),
+                                      ydata)
+
+            elif self.Channellabels[-1] == "PPG":
+
+                yvalue = self.mapData(min(self.CurrentDataSet.getNormRSP()),
+                                      max(self.CurrentDataSet.getNormRSP()),
+                                      min(self.CurrentDataSet.getNormPPG()),
+                                      max(self.CurrentDataSet.getNormPPG()),
+                                      ydata)
+
+            else:
+
+                yvalue = ydata
+
+        return yvalue
+
     def onMouseClick(self,event):
 
 
@@ -1566,6 +2303,9 @@ class Ui_MainWindow(object):
                     if okPressed and text != '':
 
                         if event.button == event.button.LEFT and event.dblclick == True:
+
+
+                            self.StatedChanged = True
 
                             if self.MainChannel=="EDA":
 
@@ -1702,7 +2442,7 @@ class Ui_MainWindow(object):
 
 
 
-                            annot = self.subPlot.annotate("", xy=(0, 0), xytext=(0, 0), textcoords="offset points",
+                            annot = self.subPlot.annotate("", xy=(0, 0), xytext=(-20, 20), textcoords="offset points",
                                                  bbox=dict(boxstyle="round", fc="w", alpha=0.4),
                                                  arrowprops=dict(arrowstyle="->"))
 
@@ -1725,6 +2465,8 @@ class Ui_MainWindow(object):
 
                 elif event.button == event.button.RIGHT:
 
+                    self.StatedChanged = True
+
                     for item,array in zip(self.CurrentDataSet.getUserAnnotation(),self.CurrentDataSet.getAxisAnnotation()):
 
                         yvalue = self.mapdataAnnotation(event.ydata)
@@ -1743,9 +2485,40 @@ class Ui_MainWindow(object):
 
                             item.remove()
 
+
+
+
+
                             self.refresh()
 
 
+
+    def on_motion(self,event):
+
+        if self.PressedData == None:
+
+            return
+
+        event_yvalue = self.mapCurrentY(event.ydata)
+
+        if (event.xdata,event_yvalue) != self.AnnotationMoved.xy:
+            return
+
+        x0, y0, xpress, ypress = self.PressedData
+
+        dx = event.xdata - xpress
+        dy = self.mapCurrentY(event.ydata) - ypress
+
+        self.AnnotationMoved.xy = (x0+dx,y0+dy)
+
+
+
+
+        self.refresh()
+
+    def on_release(self,event):
+
+        self.PressedData = None
 
 
     def mapdataAnnotation(self,y):
@@ -1894,9 +2667,12 @@ class Ui_MainWindow(object):
 
         for annot,axis in zip(self.CurrentDataSet.getUserAnnotation(),self.CurrentDataSet.getAxisAnnotation()):
 
-            ann = self.subPlot.annotate("", xy=(0, 0), xytext=(5, 5), textcoords="offset points",
+            ann = self.subPlot.annotate("", xy=(0, 0), xytext=(-20, 20), textcoords="offset points",
                                           bbox=dict(boxstyle="round", fc="w", alpha=0.4),
                                           arrowprops=dict(arrowstyle="->"))
+
+
+            #print(ann.axes)
 
 
             yvalue = 0.1

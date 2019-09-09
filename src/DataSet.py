@@ -48,7 +48,7 @@ class DataSet():
         self.Triggers = []
 
         ##Testing ###
-        self.Triggers = [100.00,100.05,100.10,100.25,100.34]
+        #self.Triggers = [100.00,100.05,100.10,100.25,100.34]
 
 
         ##Annotation##
